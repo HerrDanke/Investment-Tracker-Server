@@ -1,4 +1,4 @@
-use axum::{routing::get, Router, Json, Extension};
+use axum::{routing::get, Router, Json, extract::State};
 use crate::db::AppState;
 use crate::models::*;
 use crate::error::AppError;
@@ -7,7 +7,7 @@ pub fn routes() -> Router<AppState> {
     Router::new().route("/summary", get(get_summary))
 }
 
-async fn get_summary(Extension(state): Extension<AppState>) -> Result<Json<Summary>, AppError> {
+async fn get_summary(State(state): State<AppState>) -> Result<Json<Summary>, AppError> {
     let db = state.db.read().await;
     let mut total_investment = 0.0;
     let mut total_fees = 0.0;

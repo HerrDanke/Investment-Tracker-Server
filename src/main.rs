@@ -15,7 +15,6 @@ async fn main() {
     
     std::fs::create_dir_all(&data_dir).expect("Failed to create data directory");
 
-    // TODO: db 模块尚未实现（任务 3）
     let state = investment_tracker_server::db::AppState::new(&data_dir);
 
     let cors = CorsLayer::new()
@@ -23,13 +22,13 @@ async fn main() {
         .allow_methods(Any)
         .allow_headers(Any);
 
+    let api_router = investment_tracker_server::handlers::routes().with_state(state);
+
     let app = Router::new()
         .route("/api/health", get(health_check))
-        // TODO: handlers 模块尚未实现（任务 5）
-        .nest("/api", investment_tracker_server::handlers::routes())
+        .nest("/api", api_router)
         .layer(cors)
-        .layer(TraceLayer::new_for_http())
-        .with_state(state);
+        .layer(TraceLayer::new_for_http());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
     tracing::info!("Server listening on {}", addr);

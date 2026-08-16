@@ -12,5 +12,5 @@
 | 8 | complete | 5280691 | clean |
 | 9 | complete | 36b307b | clean |
 | 10 | complete | 416671f | clean |
-| 11 | pending | - | - |
-| 12 | pending | - | - |
+| 11 | complete | 80122e4 | clean |
+| 12 | in_progress | - | - |

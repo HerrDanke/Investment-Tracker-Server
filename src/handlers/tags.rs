@@ -1,6 +1,6 @@
 use axum::{
     routing::{get, post, patch, delete},
-    Router, Json, Extension, extract::Path,
+    Router, Json, extract::{Path, State},
 };
 use crate::db::AppState;
 use crate::models::*;
@@ -12,13 +12,13 @@ pub fn routes() -> Router<AppState> {
         .route("/tags/:id", get(get_tag).patch(update_tag).delete(delete_tag))
 }
 
-async fn list_tags(Extension(state): Extension<AppState>) -> Result<Json<Vec<Tag>>, AppError> {
+async fn list_tags(State(state): State<AppState>) -> Result<Json<Vec<Tag>>, AppError> {
     let db = state.db.read().await;
     Ok(Json(db.tags.clone()))
 }
 
 async fn get_tag(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Path(id): Path<u32>,
 ) -> Result<Json<Tag>, AppError> {
     let db = state.db.read().await;
@@ -28,7 +28,7 @@ async fn get_tag(
 }
 
 async fn create_tag(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Json(data): Json<CreateTag>,
 ) -> Result<Json<Tag>, AppError> {
     let mut db = state.db.write().await;
@@ -48,7 +48,7 @@ async fn create_tag(
 }
 
 async fn update_tag(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Path(id): Path<u32>,
     Json(data): Json<UpdateTag>,
 ) -> Result<Json<Tag>, AppError> {
@@ -64,7 +64,7 @@ async fn update_tag(
 }
 
 async fn delete_tag(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Path(id): Path<u32>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     let mut db = state.db.write().await;

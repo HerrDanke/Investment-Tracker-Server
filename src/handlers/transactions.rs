@@ -1,6 +1,6 @@
 use axum::{
     routing::{get, post, patch, delete},
-    Router, Json, Extension, extract::{Path, Query},
+    Router, Json, extract::{Path, Query, State},
 };
 use crate::db::AppState;
 use crate::models::*;
@@ -14,7 +14,7 @@ pub fn routes() -> Router<AppState> {
 }
 
 async fn list_transactions(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Query(query): Query<TransactionQuery>,
 ) -> Result<Json<Vec<TransactionWithAsset>>, AppError> {
     let db = state.db.read().await;
@@ -31,7 +31,7 @@ async fn list_transactions(
 }
 
 async fn get_transaction(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Path(id): Path<u32>,
 ) -> Result<Json<TransactionWithAsset>, AppError> {
     let db = state.db.read().await;
@@ -42,7 +42,7 @@ async fn get_transaction(
 }
 
 async fn create_transaction(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Json(data): Json<CreateTransaction>,
 ) -> Result<Json<Transaction>, AppError> {
     let mut db = state.db.write().await;
@@ -71,7 +71,7 @@ async fn create_transaction(
 }
 
 async fn update_transaction(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Path(id): Path<u32>,
     Json(data): Json<UpdateTransaction>,
 ) -> Result<Json<Transaction>, AppError> {
@@ -94,7 +94,7 @@ async fn update_transaction(
 }
 
 async fn delete_transaction(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Path(id): Path<u32>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     let mut db = state.db.write().await;

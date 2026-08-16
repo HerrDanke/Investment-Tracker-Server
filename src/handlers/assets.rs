@@ -1,6 +1,6 @@
 use axum::{
     routing::{get, post, patch, delete},
-    Router, Json, Extension, extract::Path,
+    Router, Json, extract::{Path, State},
 };
 use crate::db::AppState;
 use crate::models::*;
@@ -16,7 +16,7 @@ pub fn routes() -> Router<AppState> {
 }
 
 async fn list_assets(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
 ) -> Result<Json<Vec<AssetWithTags>>, AppError> {
     let db = state.db.read().await;
     let assets: Vec<AssetWithTags> = db.assets.iter().map(|asset| {
@@ -30,7 +30,7 @@ async fn list_assets(
 }
 
 async fn get_asset(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Path(id): Path<u32>,
 ) -> Result<Json<AssetWithTags>, AppError> {
     let db = state.db.read().await;
@@ -44,7 +44,7 @@ async fn get_asset(
 }
 
 async fn create_asset(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Json(data): Json<CreateAsset>,
 ) -> Result<Json<Asset>, AppError> {
     let mut db = state.db.write().await;
@@ -73,7 +73,7 @@ async fn create_asset(
 }
 
 async fn update_asset(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Path(id): Path<u32>,
     Json(data): Json<UpdateAsset>,
 ) -> Result<Json<Asset>, AppError> {
@@ -97,7 +97,7 @@ async fn update_asset(
 }
 
 async fn delete_asset(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Path(id): Path<u32>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     let mut db = state.db.write().await;
@@ -113,7 +113,7 @@ async fn delete_asset(
 }
 
 async fn add_tag(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Path(id): Path<u32>,
     Json(body): Json<serde_json::Value>,
 ) -> Result<Json<serde_json::Value>, AppError> {
@@ -134,7 +134,7 @@ async fn add_tag(
 }
 
 async fn remove_tag(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Path((id, tag_id)): Path<(u32, u32)>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     let mut db = state.db.write().await;
