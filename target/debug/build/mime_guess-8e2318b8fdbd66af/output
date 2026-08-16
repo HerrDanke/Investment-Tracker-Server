@@ -1,0 +1,1 @@
+cargo:rustc-env=MIME_TYPES_GENERATED_PATH=E:\FN_Syn\Projects\Investment Tracker Server\target\debug\build\mime_guess-8e2318b8fdbd66af\out\mime_types_generated.rs
