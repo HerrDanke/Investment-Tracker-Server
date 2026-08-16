@@ -34,3 +34,9 @@ impl From<serde_json::Error> for AppError {
         AppError::Internal(e.to_string())
     }
 }
+
+impl From<String> for AppError {
+    fn from(e: String) -> Self {
+        AppError::Internal(e)
+    }
+}

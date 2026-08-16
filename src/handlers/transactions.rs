@@ -1,6 +1,6 @@
 use axum::{
     routing::{get, post, patch, delete},
-    Router, Json, Extension, Path, extract::Query,
+    Router, Json, Extension, extract::{Path, Query},
 };
 use crate::db::AppState;
 use crate::models::*;
