@@ -25,6 +25,7 @@ async fn main() {
     let api_router = investment_tracker_server::handlers::routes().with_state(state);
 
     let app = Router::new()
+        .route("/", get(root_handler))
         .route("/api/health", get(health_check))
         .nest("/api", api_router)
         .layer(cors)
@@ -39,4 +40,21 @@ async fn main() {
 
 async fn health_check() -> &'static str {
     "OK"
+}
+
+async fn root_handler() -> axum::response::Html<&'static str> {
+    axum::response::Html(r#"<!DOCTYPE html>
+<html><head><title>Investment Tracker Server</title></head>
+<body>
+<h1>Investment Tracker Server</h1>
+<p>API is running. Available endpoints:</p>
+<ul>
+<li><a href="/api/health">/api/health</a> - Health check</li>
+<li><a href="/api/assets">/api/assets</a> - Assets</li>
+<li><a href="/api/transactions">/api/transactions</a> - Transactions</li>
+<li><a href="/api/tags">/api/tags</a> - Tags</li>
+<li><a href="/api/summary">/api/summary</a> - Summary</li>
+<li><a href="/api/export">/api/export</a> - Export data</li>
+</ul>
+</body></html>"#)
 }
