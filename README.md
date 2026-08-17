@@ -25,7 +25,6 @@
 
 ### 前置要求
 
-- [Rust](https://rustup.rs/) (2021 edition)
 - [Node.js](https://nodejs.org/) (v18+)
 
 ### 启动后端
@@ -146,9 +145,12 @@ docker run --rm -v investment-tracker-server_investment-data:/data -v $(pwd):/ba
 
 ## 配置
 
-| 环境变量 | 默认值 | 说明 |
-|----------|--------|------|
-| `JWT_SECRET` | `investment-tracker-secret-key-change-in-production` | JWT 签名密钥，**生产环境必须修改** |
+| 环境变量 | 说明 |
+|----------|------|
+| `PORT` | 服务端口（默认 8080） |
+| `JWT_SECRET` | JWT 签名密钥，**生产环境必须修改** |
+| `DATA_DIR` | 数据存储目录（默认 `/app/data`） |
+| `HOST` | 监听地址（默认 `0.0.0.0`） |
 
 ## 与桌面版的关系
 

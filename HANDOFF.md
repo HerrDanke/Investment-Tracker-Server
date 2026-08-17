@@ -1,10 +1,10 @@
 # Investment Tracker Server - Handoff
 
-> 最后更新：2026-08-17（第三次更新 — 代码审查优化后）
+> 最后更新：2026-08-17（第四次更新 — 后端迁移到 Node.js + Fastify）
 
 ## 项目概述
 
-投资追踪 Web 应用，帮助用户记录和管理投资买入卖出记录。包含用户认证系统（注册/登录/JWT），支持多币种、手续费、税收、标签管理。前端为 React SPA，后端为 Rust Axum API 服务。
+投资追踪 Web 应用，帮助用户记录和管理投资买入卖出记录。包含用户认证系统（注册/登录/JWT），支持多币种、手续费、税收、标签管理。前端为 React SPA，后端为 Node.js Fastify API 服务。
 
 ## 技术栈
 
@@ -184,48 +184,42 @@ npm run build
 - [x] ErrorBoundary 错误边界（全局渲染异常捕获）
 - [x] AuthContext useMemo 优化（避免无意义重渲染）
 
-## 最近修复（2026-08-17 重构为 Node.js）
+## 最近修复（2026-08-17）
 
+### 后端迁移（Rust → Node.js）
 - 后端从 Rust + Axum 迁移到 Node.js + Fastify + TypeScript
-- 移除 Cargo.toml / Cargo.lock / Rust src/ 代码
+- 删除 Cargo.toml/Cargo.lock 和所有 Rust 源码
 - 更新 Dockerfile 使用 Node.js 18 运行时（无需编译）
 - 保持所有 API 端点、数据格式、认证逻辑完全兼容
 - 数据库层使用 fs/promises + 原子写入（temp file + rename）
 - JWT 使用 @fastify/jwt，argon2 使用 node-argon2
 - 前端代码不变
 
-| 问题 | 修复 | 文件 |
-|------|------|------|
-| JWT 密钥硬编码 | 改为环境变量读取 `JWT_SECRET` | `auth.rs` |
-| JWT algorithm confusion | 明确指定 `Algorithm::HS256` | `auth.rs` |
-| 数据库静默重置 | 解析失败记录日志，不覆盖数据 | `db.rs` |
-| 阻塞 IO | `std::fs::write` → `tokio::fs::write` | `db.rs` |
-| 交易参数无校验 | 价格/数量/手续费/税全面校验 | `transactions.rs` |
-| 外键缺失 | 创建交易前验证 asset_id 存在 | `transactions.rs` |
-| 导入无限制 | 10MB 限制 + 数据量校验 | `export_import.rs` |
-| 内部错误泄露 | Internal 不返回原始信息 | `error.rs` |
-| JSON.parse 无保护 | try-catch + 自动清理 | `AuthContext.tsx` |
-| 事件监听器泄漏 | useEffect + cleanup | `Transactions.tsx` |
-| Context value 无 memo | useMemo 稳定引用 | `AuthContext.tsx` |
-| 双重 JSON.parse | 只解析一次 | `DataModal.tsx` |
-| 401 硬跳转 | PopStateEvent 客户端路由 | `api.ts` |
-| 无 ErrorBoundary | 新增组件包裹应用 | `ErrorBoundary.tsx` |
-| 未使用 import | 清理 handler 导入 | `assets.rs`/`transactions.rs`/`tags.rs` |
+### 前端修复
+- 交易列表排序时 date 字段为空导致崩溃 → 添加空值保护
+- Docker 构建时先编译 TypeScript 再复制 dist/
+- 前端静态文件服务指向 public/ 目录
+- 根路径 / 返回 index.html（不再显示 API 信息页）
+
+### 构建修复
+- Rust 1.75 不支持 Cargo.lock v4 → 升级到 1.80
+- Docker 分离依赖编译和源码编译 → 加速后续构建
+- 移除 docker-compose.yml 废弃 version 属性
 
 ## Docker 部署（2026-08-17 新增）
 
-- **多阶段 Dockerfile**：Node 18 构建前端 → Rust 1.75 构建后端 → Debian bookworm-slim 运行镜像
+- **多阶段 Dockerfile**：Node 18 构建前端 → Node 18 编译后端 → Node 18 运行
 - **docker-compose.yml**：环境变量 + 命名数据卷 + 健康检查 + 自动重启
 - **端口**：8080（可通过 `PORT` 环境变量映射）
 - **数据持久化**：命名卷 `investment-data` 挂载到 `/app/data`
-- **.dockerignore**：排除 target/dist/node_modules/data 等
-- **镜像大小**：约 50-80MB（不含前端构建缓存）
+- **.dockerignore**：排除 dist/node_modules/data 等
+- **镜像大小**：约 100-150MB（含 Node.js 运行时）
 
 ### 快速启动命令
 
 ```bash
-git clone https://github.com/InSeong-So/Investment-Tracker.git
-cd Investment-Tracker
+git clone https://github.com/HerrDanke/Investment-Tracker-Server.git
+cd Investment-Tracker-Server
 echo "JWT_SECRET=$(openssl rand -hex 32)" > .env
 docker compose up -d --build
 ```
@@ -233,7 +227,7 @@ docker compose up -d --build
 ### 数据备份
 
 ```bash
-docker run --rm -v investment-tracker_investment-data:/data -v $(pwd):/backup alpine tar czf /backup/backup-$(date +%Y%m%d).tar.gz -C /data .
+docker run --rm -v investment-tracker-server_investment-data:/data -v $(pwd):/backup alpine tar czf /backup/backup-$(date +%Y%m%d).tar.gz -C /data .
 
 ## 已知限制
 
