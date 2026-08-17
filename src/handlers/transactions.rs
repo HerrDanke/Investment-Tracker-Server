@@ -45,27 +45,30 @@ async fn create_transaction(
     State(state): State<AppState>,
     Json(data): Json<CreateTransaction>,
 ) -> Result<Json<Transaction>, AppError> {
-    let mut db = state.db.write().await;
-    let id = {
-        db.seq.transactions += 1;
-        db.seq.transactions
+    let txn = {
+        let mut db = state.db.write().await;
+        let id = {
+            db.seq.transactions += 1;
+            db.seq.transactions
+        };
+        let now = Utc::now().to_rfc3339();
+        let txn = Transaction {
+            id,
+            asset_id: data.asset_id,
+            txn_type: data.txn_type,
+            date: data.date,
+            price: data.price,
+            quantity: data.quantity,
+            fee: data.fee.unwrap_or(0.0),
+            tax: data.tax.unwrap_or(0.0),
+            currency: data.currency.unwrap_or_else(|| "EUR".to_string()),
+            notes: data.notes,
+            created_at: now.clone(),
+            updated_at: now,
+        };
+        db.transactions.push(txn.clone());
+        txn
     };
-    let now = Utc::now().to_rfc3339();
-    let txn = Transaction {
-        id,
-        asset_id: data.asset_id,
-        txn_type: data.txn_type,
-        date: data.date,
-        price: data.price,
-        quantity: data.quantity,
-        fee: data.fee.unwrap_or(0.0),
-        tax: data.tax.unwrap_or(0.0),
-        currency: data.currency.unwrap_or_else(|| "EUR".to_string()),
-        notes: data.notes,
-        created_at: now.clone(),
-        updated_at: now,
-    };
-    db.transactions.push(txn.clone());
     state.persist().await?;
     Ok(Json(txn))
 }
@@ -75,20 +78,22 @@ async fn update_transaction(
     Path(id): Path<u32>,
     Json(data): Json<UpdateTransaction>,
 ) -> Result<Json<Transaction>, AppError> {
-    let mut db = state.db.write().await;
-    let txn = db.transactions.iter_mut().find(|t| t.id == id)
-        .ok_or_else(|| AppError::NotFound(format!("Transaction {} not found", id)))?;
-    if let Some(aid) = data.asset_id { txn.asset_id = aid; }
-    if let Some(ref tt) = data.txn_type { txn.txn_type = tt.clone(); }
-    if let Some(ref d) = data.date { txn.date = d.clone(); }
-    if let Some(p) = data.price { txn.price = p; }
-    if let Some(q) = data.quantity { txn.quantity = q; }
-    if let Some(f) = data.fee { txn.fee = f; }
-    if let Some(tax) = data.tax { txn.tax = tax; }
-    if let Some(ref c) = data.currency { txn.currency = c.clone(); }
-    if let Some(ref n) = data.notes { txn.notes = Some(n.clone()); }
-    txn.updated_at = Utc::now().to_rfc3339();
-    let result = txn.clone();
+    let result = {
+        let mut db = state.db.write().await;
+        let txn = db.transactions.iter_mut().find(|t| t.id == id)
+            .ok_or_else(|| AppError::NotFound(format!("Transaction {} not found", id)))?;
+        if let Some(aid) = data.asset_id { txn.asset_id = aid; }
+        if let Some(ref tt) = data.txn_type { txn.txn_type = tt.clone(); }
+        if let Some(ref d) = data.date { txn.date = d.clone(); }
+        if let Some(p) = data.price { txn.price = p; }
+        if let Some(q) = data.quantity { txn.quantity = q; }
+        if let Some(f) = data.fee { txn.fee = f; }
+        if let Some(tax) = data.tax { txn.tax = tax; }
+        if let Some(ref c) = data.currency { txn.currency = c.clone(); }
+        if let Some(ref n) = data.notes { txn.notes = Some(n.clone()); }
+        txn.updated_at = Utc::now().to_rfc3339();
+        txn.clone()
+    };
     state.persist().await?;
     Ok(Json(result))
 }
@@ -97,12 +102,15 @@ async fn delete_transaction(
     State(state): State<AppState>,
     Path(id): Path<u32>,
 ) -> Result<Json<serde_json::Value>, AppError> {
-    let mut db = state.db.write().await;
-    let before = db.transactions.len();
-    db.transactions.retain(|t| t.id != id);
-    if db.transactions.len() == before {
-        return Err(AppError::NotFound(format!("Transaction {} not found", id)));
-    }
+    let result = {
+        let mut db = state.db.write().await;
+        let before = db.transactions.len();
+        db.transactions.retain(|t| t.id != id);
+        if db.transactions.len() == before {
+            return Err(AppError::NotFound(format!("Transaction {} not found", id)));
+        }
+        serde_json::json!({ "success": true })
+    };
     state.persist().await?;
-    Ok(Json(serde_json::json!({ "success": true })))
+    Ok(Json(result))
 }

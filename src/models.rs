@@ -217,3 +217,45 @@ pub struct Summary {
     pub currency_distribution: HashMap<String, f64>,
     pub assets: Vec<AssetSummary>,
 }
+
+// ==================== AUTH MODELS ====================
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct User {
+    pub id: String,
+    pub username: String,
+    pub password_hash: String,
+    pub created_at: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct RegisterRequest {
+    pub username: String,
+    pub password: String,
+    pub password_confirm: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct LoginRequest {
+    pub username: String,
+    pub password: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct AuthResponse {
+    pub token: String,
+    pub user: UserInfo,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct UserInfo {
+    pub id: String,
+    pub username: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Claims {
+    pub sub: String,
+    pub username: String,
+    pub exp: usize,
+}

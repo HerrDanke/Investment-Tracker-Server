@@ -1,20 +1,35 @@
 import { useState, useCallback } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Assets from './pages/Assets';
 import Transactions from './pages/Transactions';
 import Tags from './pages/Tags';
+import Login from './pages/Login';
 import { DataModal } from './components/DataModal';
 
-export default function App() {
+function ProtectedRoutes() {
+  const { user, loading } = useAuth();
   const [refreshKey, setRefreshKey] = useState(0);
   const [showDataModal, setShowDataModal] = useState(false);
 
   const refreshAll = useCallback(() => setRefreshKey(k => k + 1), []);
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
   return (
-    <BrowserRouter>
+    <>
       <Routes>
         <Route path="/" element={<Layout onDataClick={() => setShowDataModal(true)} />}>
           <Route index element={<Dashboard key={refreshKey} />} />
@@ -22,8 +37,44 @@ export default function App() {
           <Route path="transactions" element={<Transactions key={refreshKey} />} />
           <Route path="tags" element={<Tags key={refreshKey} />} />
         </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/login" element={<Navigate to="/" replace />} />
       </Routes>
       <DataModal open={showDataModal} onClose={() => setShowDataModal(false)} onImportSuccess={refreshAll} />
+    </>
+  );
+}
+
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/login" element={<PublicLogin />} />
+      <Route path="*" element={<ProtectedRoutes />} />
+    </Routes>
+  );
+}
+
+function PublicLogin() {
+  const { user, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+  if (user) {
+    return <Navigate to="/" replace />;
+  }
+  return <Login />;
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </BrowserRouter>
   );
 }

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "709bc3f7-15be-48c9-9293-dab028230697",
+    "username": "testuser",
+    "password_hash": "$argon2id$v=19$m=19456,t=2,p=1$SzHZ4xB7vQunGta45Z6pMg$qFqZaqehXzap/YYGA3L3o8J6cW8NrzRGFEXd5bmRrvo",
+    "created_at": "2026-08-17T17:48:16.983580900+00:00"
+  },
+  {
+    "id": "e98848c7-4ae7-4211-980e-bb37ea8351a0",
+    "username": "newuser123",
+    "password_hash": "$argon2id$v=19$m=19456,t=2,p=1$oNEL2cZEPYTiehH6iRVl8w$pXli6saT4fwGSWfsHrHfy3KUNWCsPstk6u9hjsTFDik",
+    "created_at": "2026-08-17T17:50:59.466503100+00:00"
+  },
+  {
+    "id": "517707fa-426f-4595-9632-ed46359ba3ad",
+    "username": "admin",
+    "password_hash": "$argon2id$v=19$m=19456,t=2,p=1$oGnKwpIx4aOMh9VNmlyC/A$WTbcmPy34GHWkumoMGnUdubRrVoyVsHPdck2+U0DGS0",
+    "created_at": "2026-08-17T17:52:24.872236+00:00"
+  }
+]

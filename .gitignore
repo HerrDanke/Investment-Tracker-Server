@@ -1,0 +1,23 @@
+# Rust build artifacts
+/target/
+**/*.rs.bk
+*.pdb
+
+# Node modules and build
+node_modules/
+dist/
+
+# Local environment
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Data (optional - uncomment if you don't want to commit data)
+# data/data.json
+# data/users.json

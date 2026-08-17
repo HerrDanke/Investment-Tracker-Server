@@ -20,8 +20,10 @@ async fn import_data(
 ) -> Result<Json<serde_json::Value>, AppError> {
     let imported: crate::models::Database = serde_json::from_str(&body)
         .map_err(|e| AppError::BadRequest(format!("Invalid JSON: {}", e)))?;
-    let mut db = state.db.write().await;
-    *db = imported;
+    {
+        let mut db = state.db.write().await;
+        *db = imported;
+    }
     state.persist().await?;
     Ok(Json(serde_json::json!({ "success": true })))
 }

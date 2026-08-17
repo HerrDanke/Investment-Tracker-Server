@@ -31,18 +31,21 @@ async fn create_tag(
     State(state): State<AppState>,
     Json(data): Json<CreateTag>,
 ) -> Result<Json<Tag>, AppError> {
-    let mut db = state.db.write().await;
-    let id = {
-        db.seq.tags += 1;
-        db.seq.tags
+    let tag = {
+        let mut db = state.db.write().await;
+        let id = {
+            db.seq.tags += 1;
+            db.seq.tags
+        };
+        let tag = Tag {
+            id,
+            name: data.name,
+            category: data.category.unwrap_or_else(|| "custom".to_string()),
+            color: data.color.unwrap_or_else(|| "#6B7280".to_string()),
+        };
+        db.tags.push(tag.clone());
+        tag
     };
-    let tag = Tag {
-        id,
-        name: data.name,
-        category: data.category.unwrap_or_else(|| "custom".to_string()),
-        color: data.color.unwrap_or_else(|| "#6B7280".to_string()),
-    };
-    db.tags.push(tag.clone());
     state.persist().await?;
     Ok(Json(tag))
 }
@@ -52,13 +55,15 @@ async fn update_tag(
     Path(id): Path<u32>,
     Json(data): Json<UpdateTag>,
 ) -> Result<Json<Tag>, AppError> {
-    let mut db = state.db.write().await;
-    let tag = db.tags.iter_mut().find(|t| t.id == id)
-        .ok_or_else(|| AppError::NotFound(format!("Tag {} not found", id)))?;
-    if let Some(ref n) = data.name { tag.name = n.clone(); }
-    if let Some(ref c) = data.category { tag.category = c.clone(); }
-    if let Some(ref c) = data.color { tag.color = c.clone(); }
-    let result = tag.clone();
+    let result = {
+        let mut db = state.db.write().await;
+        let tag = db.tags.iter_mut().find(|t| t.id == id)
+            .ok_or_else(|| AppError::NotFound(format!("Tag {} not found", id)))?;
+        if let Some(ref n) = data.name { tag.name = n.clone(); }
+        if let Some(ref c) = data.category { tag.category = c.clone(); }
+        if let Some(ref c) = data.color { tag.color = c.clone(); }
+        tag.clone()
+    };
     state.persist().await?;
     Ok(Json(result))
 }
@@ -67,13 +72,16 @@ async fn delete_tag(
     State(state): State<AppState>,
     Path(id): Path<u32>,
 ) -> Result<Json<serde_json::Value>, AppError> {
-    let mut db = state.db.write().await;
-    let before = db.tags.len();
-    db.tags.retain(|t| t.id != id);
-    if db.tags.len() == before {
-        return Err(AppError::NotFound(format!("Tag {} not found", id)));
-    }
-    db.asset_tags.retain(|at| at.tag_id != id);
+    let result = {
+        let mut db = state.db.write().await;
+        let before = db.tags.len();
+        db.tags.retain(|t| t.id != id);
+        if db.tags.len() == before {
+            return Err(AppError::NotFound(format!("Tag {} not found", id)));
+        }
+        db.asset_tags.retain(|at| at.tag_id != id);
+        serde_json::json!({ "success": true })
+    };
     state.persist().await?;
-    Ok(Json(serde_json::json!({ "success": true })))
+    Ok(Json(result))
 }

@@ -3,14 +3,29 @@ import type { AssetWithTags, TransactionWithAsset, Tag, Summary, CreateAsset, Cr
 
 const api = axios.create({
   baseURL: '/api',
-  headers: { 'Content-Type': 'application/json' }
+  headers: { 'Content-Type': 'application/json' },
+  timeout: 30000,
 })
 
+// Attach JWT token from localStorage to every request
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
+// Handle 401 — clear session and redirect to login
 api.interceptors.response.use(
-  res => res,
-  err => {
-    const msg = err.response?.data?.error || err.message
-    return Promise.reject(new Error(msg))
+  (res) => res,
+  (err) => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      window.location.href = '/login'
+    }
+    return Promise.reject(err)
   }
 )
 

@@ -7,14 +7,24 @@ interface Props {
   onImportSuccess?: () => void;
 }
 
+// File System Access API types
+interface SaveFilePickerOptions {
+  suggestedName?: string;
+  types?: { description: string; accept: Record<string, string[]> }[];
+}
+
+declare global {
+  interface Window {
+    showSaveFilePicker?: (options?: SaveFilePickerOptions) => Promise<FileSystemFileHandle>;
+  }
+}
+
 export function DataModal({ open, onClose, onImportSuccess }: Props) {
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const loading = exporting || importing;
 
   if (!open) return null;
 
@@ -24,11 +34,39 @@ export function DataModal({ open, onClose, onImportSuccess }: Props) {
     setSuccess(null);
     try {
       const data = await dataApi.export();
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const json = JSON.stringify(data, null, 2);
+      const fileName = `investment-tracker-backup-${new Date().toISOString().slice(0, 10)}.json`;
+
+      // Try File System Access API first (shows path picker dialog)
+      if (window.showSaveFilePicker) {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: fileName,
+            types: [
+              { description: 'JSON 文件', accept: { 'application/json': ['.json'] } },
+            ],
+          });
+          const writable = await handle.createWritable();
+          await writable.write(json);
+          await writable.close();
+          setSuccess(`导出成功: ${handle.name}`);
+          return;
+        } catch (e: any) {
+          if (e.name === 'AbortError') {
+            // User cancelled the picker
+            setExporting(false);
+            return;
+          }
+          // Fall through to download fallback
+        }
+      }
+
+      // Fallback: browser download
+      const blob = new Blob([json], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `investment-tracker-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = fileName;
       a.click();
       URL.revokeObjectURL(url);
       setSuccess('导出成功');
@@ -67,6 +105,8 @@ export function DataModal({ open, onClose, onImportSuccess }: Props) {
     }
   };
 
+  const loading = exporting || importing;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
       <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl w-full max-w-md mx-4 p-6" onClick={e => e.stopPropagation()}>
@@ -104,7 +144,7 @@ export function DataModal({ open, onClose, onImportSuccess }: Props) {
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
-            {exporting ? '导出中...' : '导出数据 (JSON)'}
+            {exporting ? '导出中...' : '导出数据 (选择保存路径)'}
           </button>
 
           <button
@@ -115,7 +155,7 @@ export function DataModal({ open, onClose, onImportSuccess }: Props) {
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
             </svg>
-            {importing ? '导入中...' : '导入数据 (JSON)'}
+            {importing ? '导入中...' : '导入数据 (选择文件)'}
           </button>
 
           <input

@@ -9,7 +9,7 @@ export default function Layout({ onDataClick }: Props) {
   return (
     <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950">
       <Sidebar onDataClick={onDataClick} />
-      <main className="flex-1 p-8 overflow-auto">
+      <main className="flex-1 p-8 overflow-auto ml-64">
         <Outlet />
       </main>
     </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, PiggyBank, ArrowLeftRight, Tags, Database, Moon, Sun } from 'lucide-react';
+import { LayoutDashboard, PiggyBank, ArrowLeftRight, Tags, Database, Moon, Sun, LogOut, User } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: '概览' },
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export default function Sidebar({ onDataClick }: Props) {
+  const { user, logout } = useAuth();
   const [dark, setDark] = useState(() => {
     try {
       return localStorage.getItem('theme') === 'dark';
@@ -28,7 +30,7 @@ export default function Sidebar({ onDataClick }: Props) {
   }, [dark]);
 
   return (
-    <aside className="w-64 bg-zinc-900 dark:bg-zinc-950 text-white min-h-screen p-4 flex flex-col">
+    <aside className="w-64 bg-zinc-900 dark:bg-zinc-950 text-white h-screen p-4 flex flex-col fixed left-0 top-0 overflow-y-auto">
       <h1 className="text-xl font-bold mb-8 px-2">投资追踪</h1>
       <nav className="space-y-1 flex-1">
         {navItems.map(({ to, icon: Icon, label }) => (
@@ -62,6 +64,26 @@ export default function Sidebar({ onDataClick }: Props) {
           <span>{dark ? '浅色模式' : '深色模式'}</span>
         </button>
       </div>
+      {/* User section at bottom */}
+      {user && (
+        <div className="border-t border-zinc-700 pt-4 mt-2">
+          <div className="flex items-center gap-3 px-3 py-2 mb-2">
+            <div className="w-8 h-8 bg-zinc-700 rounded-full flex items-center justify-center">
+              <User size={16} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium truncate">{user.username}</div>
+            </div>
+          </div>
+          <button
+            onClick={logout}
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-zinc-300 hover:bg-red-900/30 hover:text-red-400 w-full text-left transition-colors"
+          >
+            <LogOut size={20} />
+            <span>退出登录</span>
+          </button>
+        </div>
+      )}
     </aside>
   );
 }
