@@ -57,6 +57,51 @@ npm run build
 # 产物在 dist/ 目录
 ```
 
+## Docker 部署
+
+### 前置要求
+
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/) (v2+)
+
+### 快速启动
+
+```bash
+# 克隆项目
+git clone https://github.com/InSeong-So/Investment-Tracker.git
+cd Investment-Tracker
+
+# 设置生产环境 JWT 密钥
+echo "JWT_SECRET=$(openssl rand -hex 32)" > .env
+
+# 构建并启动
+docker compose up -d --build
+
+# 查看日志
+docker compose logs -f
+```
+
+访问 `http://<server-ip>:8080`
+
+### 数据备份
+
+```bash
+# 备份数据卷
+docker run --rm -v investment-tracker_investment-data:/data -v $(pwd):/backup alpine tar czf /backup/backup-$(date +%Y%m%d).tar.gz -C /data .
+
+# 恢复数据
+docker run --rm -v investment-tracker_investment-data:/data -v $(pwd):/backup alpine tar xzf /backup/backup-20260817.tar.gz -C /data
+```
+
+### 配置
+
+| 环境变量 | 默认值 | 说明 |
+|----------|--------|------|
+| `PORT` | `8080` | 服务端口 |
+| `JWT_SECRET` | 硬编码默认值 | **生产环境必须修改** |
+| `DATA_DIR` | `/app/data` | 数据目录 |
+| `RUST_LOG` | `info` | 日志级别 |
+
 ## 使用说明
 
 1. **注册账户**：首次使用点击注册，输入用户名（≥3字符）和密码（≥6字符）

@@ -208,6 +208,29 @@ npm run build
 | 无 ErrorBoundary | 新增组件包裹应用 | `ErrorBoundary.tsx` |
 | 未使用 import | 清理 handler 导入 | `assets.rs`/`transactions.rs`/`tags.rs` |
 
+## Docker 部署（2026-08-17 新增）
+
+- **多阶段 Dockerfile**：Node 18 构建前端 → Rust 1.75 构建后端 → Debian bookworm-slim 运行镜像
+- **docker-compose.yml**：环境变量 + 命名数据卷 + 健康检查 + 自动重启
+- **端口**：8080（可通过 `PORT` 环境变量映射）
+- **数据持久化**：命名卷 `investment-data` 挂载到 `/app/data`
+- **.dockerignore**：排除 target/dist/node_modules/data 等
+- **镜像大小**：约 50-80MB（不含前端构建缓存）
+
+### 快速启动命令
+
+```bash
+git clone https://github.com/InSeong-So/Investment-Tracker.git
+cd Investment-Tracker
+echo "JWT_SECRET=$(openssl rand -hex 32)" > .env
+docker compose up -d --build
+```
+
+### 数据备份
+
+```bash
+docker run --rm -v investment-tracker_investment-data:/data -v $(pwd):/backup alpine tar czf /backup/backup-$(date +%Y%m%d).tar.gz -C /data .
+
 ## 已知限制
 
 1. **数据存储**：单文件 JSON，不支持多用户数据隔离（所有用户共享同一 data.json）

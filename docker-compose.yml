@@ -2,12 +2,28 @@ version: "3.8"
 
 services:
   investment-tracker:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: investment-tracker:latest
+    container_name: investment-tracker
     ports:
-      - "8080:8080"
+      - "${PORT:-8080}:8080"
     volumes:
-      - ./data:/data
+      - investment-data:/app/data
     environment:
+      - PORT=8080
+      - DATA_DIR=/app/data
+      - JWT_SECRET=${JWT_SECRET:-please-change-this-secret}
       - RUST_LOG=info
-      - DATA_DIR=/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  investment-data:
+    driver: local
