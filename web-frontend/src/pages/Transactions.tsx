@@ -183,7 +183,7 @@ export default function Transactions() {
                   <td className="py-3 px-4 text-right truncate" style={{ width: getColWidth('fee') + 'px' }}>{txn.fee?.toFixed(2) ?? '-'}</td>
                   <td className="py-3 px-4 text-right truncate" style={{ width: getColWidth('amount') + 'px' }}>{txn.txn_type === 'DIVIDEND' ? '-' : fmt(amount)}</td>
                   <td className="py-3 px-4 text-zinc-400 truncate" style={{ width: getColWidth('notes') + 'px' }}>{txn.notes || '-'}</td>
-                  <td className="py-3 px-4 text-center sticky right-0 bg-white dark:bg-zinc-900 border-l border-zinc-200 dark:border-zinc-800" style={{ width: getColWidth('actions') + 'px' }}>
+                  <td className="py-3 px-4 text-center sticky right-0 bg-white dark:bg-zinc-900" style={{ width: getColWidth('actions') + 'px' }}>
                     <button onClick={() => { setEditingTxn(txn); setShowForm(true) }} className="p-1 hover:bg-zinc-100 rounded mr-1">
                       <Edit2 size={14} className="text-zinc-400" />
                     </button>
@@ -237,7 +237,7 @@ function Th({ col, label, width, align }: {
 }) {
   return (
     <th
-      className="relative py-3 px-4 font-medium text-zinc-500 select-none sticky right-0 bg-zinc-50 dark:bg-zinc-800/50 border-l border-zinc-100 dark:border-zinc-800 z-20"
+      className="relative py-3 px-4 font-medium text-zinc-500 select-none sticky right-0 bg-zinc-50 dark:bg-zinc-800/50 z-20"
       style={{ width: width + 'px', minWidth: width + 'px' }}
     >
       <span className={`flex items-center ${align === 'right' ? 'justify-end' : ''} ${align === 'center' ? 'justify-center' : ''}`}>
