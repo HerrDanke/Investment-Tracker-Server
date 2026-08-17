@@ -12,7 +12,7 @@ services:
     environment:
       - PORT=8080
       - DATA_DIR=/app/data
-      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env file}
+      - JWT_SECRET=${JWT_SECRET:-please-change-this-secret}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/health"]
