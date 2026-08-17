@@ -5,6 +5,8 @@ WORKDIR /app
 COPY web-frontend/package.json web-frontend/package-lock.json ./
 RUN npm ci
 COPY web-frontend/ ./
+# Fix permissions: COPY may overwrite node_modules/.bin symlinks
+RUN chmod +x node_modules/.bin/* 2>/dev/null || true
 RUN npm run build
 
 # Stage 2: Build Rust backend
