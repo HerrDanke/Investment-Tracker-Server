@@ -3,12 +3,17 @@ use argon2::{
     Argon2,
 };
 use chrono::{Duration, Utc};
-use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
+use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation, Algorithm};
 use crate::error::AppError;
 use crate::models::Claims;
 
-const JWT_SECRET: &[u8] = b"investment-tracker-secret-key-change-in-production";
 const TOKEN_EXPIRY_HOURS: i64 = 24 * 7; // 7 days
+
+fn get_jwt_secret() -> Vec<u8> {
+    std::env::var("JWT_SECRET")
+        .map(|s| s.into_bytes())
+        .unwrap_or_else(|_| b"investment-tracker-secret-key-change-in-production".to_vec())
+}
 
 pub fn hash_password(password: &str) -> Result<String, AppError> {
     let salt = SaltString::generate(&mut OsRng);
@@ -41,16 +46,20 @@ pub fn generate_token(user_id: &str, username: &str) -> Result<String, AppError>
     encode(
         &Header::default(),
         &claims,
-        &EncodingKey::from_secret(JWT_SECRET),
+        &EncodingKey::from_secret(&get_jwt_secret()),
     )
     .map_err(|e| AppError::Internal(format!("Token generation failed: {}", e)))
 }
 
 pub fn verify_token(token: &str) -> Result<Claims, AppError> {
+    let mut validation = Validation::new(Algorithm::HS256);
+    validation.validate_exp = true;
+    validation.required_spec_claims.insert("exp".to_string());
+    
     decode::<Claims>(
         token,
-        &DecodingKey::from_secret(JWT_SECRET),
-        &Validation::default(),
+        &DecodingKey::from_secret(&get_jwt_secret()),
+        &validation,
     )
     .map(|data| data.claims)
     .map_err(|_| AppError::Unauthorized("Invalid or expired token".to_string()))

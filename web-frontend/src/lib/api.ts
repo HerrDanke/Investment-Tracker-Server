@@ -16,14 +16,17 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// Handle 401 — clear session and redirect to login
+// Handle 401 �?clear session and redirect to login
 api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
-      window.location.href = '/login'
+      if (window.location.pathname !== '/login') {
+        window.history.replaceState(null, '', '/login')
+        window.dispatchEvent(new PopStateEvent('popstate'))
+      }
     }
     return Promise.reject(err)
   }

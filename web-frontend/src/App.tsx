@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Assets from './pages/Assets';
@@ -73,7 +74,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <ErrorBoundary>
+          <AppRoutes />
+        </ErrorBoundary>
       </AuthProvider>
     </BrowserRouter>
   );

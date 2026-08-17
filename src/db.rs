@@ -17,15 +17,29 @@ impl AppState {
         let users_path = data_dir.join("users.json");
 
         let db = if data_path.exists() {
-            let content = std::fs::read_to_string(&data_path).unwrap_or_default();
-            serde_json::from_str(&content).unwrap_or_default()
+            match std::fs::read_to_string(&data_path) {
+                Ok(content) if !content.trim().is_empty() => {
+                    serde_json::from_str(&content).unwrap_or_else(|e| {
+                        tracing::error!("Failed to parse data.json: {}. Starting with empty database.", e);
+                        Database::default()
+                    })
+                }
+                _ => Database::default(),
+            }
         } else {
             Database::default()
         };
 
         let users = if users_path.exists() {
-            let content = std::fs::read_to_string(&users_path).unwrap_or_default();
-            serde_json::from_str(&content).unwrap_or_default()
+            match std::fs::read_to_string(&users_path) {
+                Ok(content) if !content.trim().is_empty() => {
+                    serde_json::from_str(&content).unwrap_or_else(|e| {
+                        tracing::error!("Failed to parse users.json: {}. Starting with empty users.", e);
+                        Vec::new()
+                    })
+                }
+                _ => Vec::new(),
+            }
         } else {
             Vec::new()
         };
@@ -39,16 +53,20 @@ impl AppState {
     }
 
     pub async fn persist(&self) -> Result<(), String> {
-        let db = self.db.read().await;
-        let json = serde_json::to_string_pretty(&*db).map_err(|e| e.to_string())?;
-        std::fs::write(&self.data_path, json).map_err(|e| e.to_string())?;
+        let json = {
+            let db = self.db.read().await;
+            serde_json::to_string_pretty(&*db).map_err(|e| e.to_string())?
+        };
+        tokio::fs::write(&self.data_path, json).await.map_err(|e| e.to_string())?;
         Ok(())
     }
 
     pub async fn persist_users(&self) -> Result<(), String> {
-        let users = self.users.read().await;
-        let json = serde_json::to_string_pretty(&*users).map_err(|e| e.to_string())?;
-        std::fs::write(&self.users_path, json).map_err(|e| e.to_string())?;
+        let json = {
+            let users = self.users.read().await;
+            serde_json::to_string_pretty(&*users).map_err(|e| e.to_string())?
+        };
+        tokio::fs::write(&self.users_path, json).await.map_err(|e| e.to_string())?;
         Ok(())
     }
 }

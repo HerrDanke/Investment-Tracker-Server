@@ -64,7 +64,9 @@ export default function Transactions() {
     try {
       const data = await assetApi.list();
       setAssets(data);
-    } catch {}
+    } catch (e: any) {
+      console.error('加载资产失败:', e.message);
+    }
   }, []);
 
   async function handleDelete(id: number) {
@@ -82,25 +84,33 @@ export default function Transactions() {
     e.stopPropagation();
     resizingRef.current = { col, startX: e.clientX, startWidth: getColWidth(col) };
     setResizingCol(col);
+  };
+
+  // 列宽拖拽事件监听，带清理
+  useEffect(() => {
+    if (!resizingCol) return;
 
     const handleMove = (ev: MouseEvent) => {
       if (!resizingRef.current) return;
       const diff = ev.clientX - resizingRef.current.startX;
       const newWidth = Math.max(50, resizingRef.current.startWidth + diff);
-      setColWidths(prev => ({ ...prev, [col]: newWidth }));
+      setColWidths(prev => ({ ...prev, [resizingRef.current!.col]: newWidth }));
     };
 
     const handleUp = () => {
       saveColWidths(widthsRef.current);
       resizingRef.current = null;
       setResizingCol(null);
-      document.removeEventListener('mousemove', handleMove);
-      document.removeEventListener('mouseup', handleUp);
     };
 
     document.addEventListener('mousemove', handleMove);
     document.addEventListener('mouseup', handleUp);
-  };
+
+    return () => {
+      document.removeEventListener('mousemove', handleMove);
+      document.removeEventListener('mouseup', handleUp);
+    };
+  }, [resizingCol]);
 
   const totalWidth = COL_KEYS.reduce((sum, col) => sum + getColWidth(col), 0);
 

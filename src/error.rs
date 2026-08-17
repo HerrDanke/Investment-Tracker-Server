@@ -18,7 +18,11 @@ impl IntoResponse for AppError {
         let (status, message) = match self {
             AppError::NotFound(msg) => (StatusCode::NOT_FOUND, msg),
             AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, msg),
-            AppError::Internal(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg),
+            AppError::Internal(_) => {
+                // 内部错误不暴露详细信息给客户端
+                tracing::error!("Internal server error: {:?}", self);
+                (StatusCode::INTERNAL_SERVER_ERROR, "服务器内部错误".to_string())
+            }
             AppError::Unauthorized(msg) => (StatusCode::UNAUTHORIZED, msg),
         };
         (status, Json(json!({ "error": message }))).into_response()

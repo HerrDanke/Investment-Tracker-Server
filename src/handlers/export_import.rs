@@ -18,8 +18,20 @@ async fn import_data(
     State(state): State<AppState>,
     body: String,
 ) -> Result<Json<serde_json::Value>, AppError> {
+    // 限制导入数据大小 (10MB)
+    const MAX_IMPORT_SIZE: usize = 10 * 1024 * 1024;
+    if body.len() > MAX_IMPORT_SIZE {
+        return Err(AppError::BadRequest("导入文件过大，最大支持 10MB".to_string()));
+    }
+    
     let imported: crate::models::Database = serde_json::from_str(&body)
-        .map_err(|e| AppError::BadRequest(format!("Invalid JSON: {}", e)))?;
+        .map_err(|e| AppError::BadRequest(format!("JSON 格式无效: {}", e)))?;
+    
+    // 验证数据结构完整性
+    if imported.assets.len() > 10000 || imported.transactions.len() > 100000 || imported.tags.len() > 1000 {
+        return Err(AppError::BadRequest("数据量超出合理范围".to_string()));
+    }
+    
     {
         let mut db = state.db.write().await;
         *db = imported;

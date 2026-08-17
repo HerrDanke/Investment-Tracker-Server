@@ -91,8 +91,8 @@ export function DataModal({ open, onClose, onImportSuccess }: Props) {
 
     try {
       const text = await file.text();
-      JSON.parse(text); // Validate JSON
-      await dataApi.import(JSON.parse(text));
+      const data = JSON.parse(text); // 只解析一次
+      await dataApi.import(data);
       setSuccess('导入成功');
       if (onImportSuccess) {
         onImportSuccess();

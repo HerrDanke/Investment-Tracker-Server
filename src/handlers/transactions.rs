@@ -1,5 +1,5 @@
 use axum::{
-    routing::{get, post, patch, delete},
+    routing::get,
     Router, Json, extract::{Path, Query, State},
 };
 use crate::db::AppState;
@@ -45,8 +45,30 @@ async fn create_transaction(
     State(state): State<AppState>,
     Json(data): Json<CreateTransaction>,
 ) -> Result<Json<Transaction>, AppError> {
+    // 验证交易类型
+    if !matches!(data.txn_type.as_str(), "buy" | "sell" | "dividend") {
+        return Err(AppError::BadRequest(format!("无效的交易类型: {}", data.txn_type)));
+    }
+    // 验证价格和数量
+    if !data.price.is_finite() || data.price < 0.0 {
+        return Err(AppError::BadRequest("价格必须为非负数".to_string()));
+    }
+    if !data.quantity.is_finite() || data.quantity <= 0.0 {
+        return Err(AppError::BadRequest("数量必须为正数".to_string()));
+    }
+    if data.fee.map_or(false, |f| !f.is_finite() || f < 0.0) {
+        return Err(AppError::BadRequest("手续费必须为非负数".to_string()));
+    }
+    if data.tax.map_or(false, |t| !t.is_finite() || t < 0.0) {
+        return Err(AppError::BadRequest("税费必须为非负数".to_string()));
+    }
+    
     let txn = {
         let mut db = state.db.write().await;
+        // 验证资产存在
+        if !db.assets.iter().any(|a| a.id == data.asset_id) {
+            return Err(AppError::NotFound(format!("资产 {} 不存在", data.asset_id)));
+        }
         let id = {
             db.seq.transactions += 1;
             db.seq.transactions
