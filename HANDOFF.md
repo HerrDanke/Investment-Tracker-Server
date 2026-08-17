@@ -1,6 +1,6 @@
 # Investment Tracker Server - Handoff
 
-> 最后更新：2026-08-17（第五次更新 — 代码审查修复 + Docker 优化）
+> 最后更新：2026-08-17（第六次更新 — 资产标签筛选功能）
 
 ## 项目概述
 
@@ -176,6 +176,8 @@ npm run build
 - [x] 7 种卡片类型（stats/chart-holdings/chart-type/chart-currency/chart-tags/recent-trades/holdings）
 - [x] 图表类型切换（柱状/饼图/折线）
 - [x] 交易表格列宽调整（双竖线手柄 + localStorage 持久化 + cleanup）
+- [x] 操作列固定右侧（sticky right-0）
+- [x] 资产标签筛选（多标签组合筛选 + 颜色高亮 + 结果计数）
 - [x] 数据导出（File System Access API 路径选择弹窗）
 - [x] 数据导入（文件选择 + 全局刷新，单次 JSON 解析）
 - [x] 深色模式（zinc 色系，localStorage 持久化，文本可读性优化）

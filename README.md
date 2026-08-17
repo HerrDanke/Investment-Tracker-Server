@@ -4,7 +4,7 @@
 
 ## 功能特性
 
-- **资产管理**：添加/编辑投资标的（股票、基金、ETF 等），支持代码、类型、币种
+- **资产管理**：添加/编辑投资标的（股票、基金、ETF 等），支持代码、类型、币种，可按标签筛选
 - **交易记录**：买入/卖出/分红，含价格、数量、手续费、税收、日期
 - **标签系统**：预设标签（A股/港股/美股/基金/宽基指数）+ 自定义标签，支持分类和颜色
 - **数据导出/导入**：JSON 格式备份与恢复，导出可选保存路径，导入自动创建备份
@@ -134,25 +134,25 @@ docker run --rm -v investment-tracker-server_investment-data:/data -v $(pwd):/ba
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | `/api/assets` | 资产列表 |
+| GET | `/api/assets` | 资产列表（含标签） |
 | POST | `/api/assets` | 创建资产 |
-| GET/DELETE | `/api/assets/:id/tags/:tagId` | 添加/移除资产标签 |
-| GET | `/api/transactions` | 交易列表（支持 `assetId`/`type`/`startDate`/`endDate` 过滤） |
+| GET | `/api/assets/:id` | 资产详情 |
+| PATCH | `/api/assets/:id` | 更新资产 |
+| DELETE | `/api/assets/:id` | 删除资产 |
+| POST | `/api/assets/:id/tags` | 为资产添加标签 |
+| DELETE | `/api/assets/:id/tags/:tagId` | 移除资产标签 |
+| GET | `/api/transactions` | 交易列表（支持 `asset_id`/`txn_type`/`start_date`/`end_date` 过滤） |
 | POST | `/api/transactions` | 创建交易 |
+| GET | `/api/transactions/:id` | 交易详情 |
+| PATCH | `/api/transactions/:id` | 更新交易 |
+| DELETE | `/api/transactions/:id` | 删除交易 |
 | GET | `/api/tags` | 标签列表 |
 | POST | `/api/tags` | 创建标签 |
+| PATCH | `/api/tags/:id` | 更新标签 |
+| DELETE | `/api/tags/:id` | 删除标签 |
 | GET | `/api/summary` | 投资汇总统计 |
 | GET | `/api/export` | 导出全部数据 |
 | POST | `/api/import` | 导入数据（最大 10MB） |
-
-## 配置
-
-| 环境变量 | 说明 |
-|----------|------|
-| `PORT` | 服务端口（默认 8080） |
-| `JWT_SECRET` | JWT 签名密钥，**生产环境必须修改** |
-| `DATA_DIR` | 数据存储目录（默认 `/app/data`） |
-| `HOST` | 监听地址（默认 `0.0.0.0`） |
 
 ## 与桌面版的关系
 
