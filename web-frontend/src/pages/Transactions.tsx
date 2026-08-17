@@ -160,7 +160,7 @@ export default function Transactions() {
               <ResizableTh col="fee" label="手续费" width={getColWidth('fee')} align="right" resizing={resizingCol === 'fee'} onResize={handleResizeStart} />
               <ResizableTh col="amount" label="金额" width={getColWidth('amount')} align="right" resizing={resizingCol === 'amount'} onResize={handleResizeStart} />
               <ResizableTh col="notes" label="备注" width={getColWidth('notes')} resizing={resizingCol === 'notes'} onResize={handleResizeStart} />
-              <ResizableTh col="actions" label="操作" width={getColWidth('actions')} align="center" resizing={resizingCol === 'actions'} onResize={handleResizeStart} />
+              <Th col="actions" label="操作" width={getColWidth('actions')} align="center" />
             </tr>
           </thead>
           <tbody>
@@ -183,7 +183,7 @@ export default function Transactions() {
                   <td className="py-3 px-4 text-right truncate" style={{ width: getColWidth('fee') + 'px' }}>{txn.fee?.toFixed(2) ?? '-'}</td>
                   <td className="py-3 px-4 text-right truncate" style={{ width: getColWidth('amount') + 'px' }}>{txn.txn_type === 'DIVIDEND' ? '-' : fmt(amount)}</td>
                   <td className="py-3 px-4 text-zinc-400 truncate" style={{ width: getColWidth('notes') + 'px' }}>{txn.notes || '-'}</td>
-                  <td className="py-3 px-4 text-center" style={{ width: getColWidth('actions') + 'px' }}>
+                  <td className="py-3 px-4 text-center sticky right-0 bg-white dark:bg-zinc-900 border-l border-zinc-200 dark:border-zinc-800" style={{ width: getColWidth('actions') + 'px' }}>
                     <button onClick={() => { setEditingTxn(txn); setShowForm(true) }} className="p-1 hover:bg-zinc-100 rounded mr-1">
                       <Edit2 size={14} className="text-zinc-400" />
                     </button>
@@ -227,6 +227,21 @@ function ResizableTh({ col, label, width, align, resizing, onResize }: {
       >
         <span className={`w-px h-5 transition-colors duration-150 ${resizing ? 'bg-blue-500' : 'bg-zinc-300 dark:bg-zinc-600 group-hover:bg-zinc-500'}`} />
         <span className={`w-px h-5 transition-colors duration-150 ${resizing ? 'bg-blue-500' : 'bg-zinc-300 dark:bg-zinc-600 group-hover:bg-zinc-500'}`} />
+      </span>
+    </th>
+  );
+}
+
+function Th({ col, label, width, align }: {
+  col: string; label: string; width: number; align?: string;
+}) {
+  return (
+    <th
+      className="relative py-3 px-4 font-medium text-zinc-500 select-none sticky right-0 bg-zinc-50 dark:bg-zinc-800/50 border-l border-zinc-100 dark:border-zinc-800 z-20"
+      style={{ width: width + 'px', minWidth: width + 'px' }}
+    >
+      <span className={`flex items-center ${align === 'right' ? 'justify-end' : ''} ${align === 'center' ? 'justify-center' : ''}`}>
+        <span className="truncate">{label}</span>
       </span>
     </th>
   );
