@@ -2,6 +2,7 @@ use axum::{routing::get, Router};
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use tower_http::cors::{Any, CorsLayer};
+use tower_http::services::ServeDir;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber;
 
@@ -38,10 +39,18 @@ async fn main() {
         .route("/", get(root_handler))
         .route("/api/health", get(health_check))
         .nest("/api", api_router)
+        // Serve static frontend files from "dist/" directory
+        .nest_service("/assets", ServeDir::new("dist/assets"))
+        .fallback_service(ServeDir::new("dist").append_index_html_on_directories(true))
         .layer(cors)
         .layer(TraceLayer::new_for_http());
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
+    let port = std::env::var("PORT")
+        .ok()
+        .and_then(|p| p.parse().ok())
+        .unwrap_or(8080u16);
+
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
     tracing::info!("Server listening on {}", addr);
     
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
