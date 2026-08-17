@@ -16,7 +16,7 @@
 
 | 层级 | 技术 |
 |------|------|
-| 后端 | Rust + Axum 0.7 + Tokio |
+| 后端 | Node.js + Fastify + TypeScript |
 | 前端 | React 18 + Vite 5 + TypeScript + TailwindCSS + Recharts + @dnd-kit |
 | 存储 | JSON 文件（`data.json` + `users.json`） |
 | 认证 | Argon2 密码哈希 + JWT (HS256, 7天有效期) |
@@ -33,10 +33,17 @@
 ```bash
 cd Investment-Tracker-Server
 
+# 安装依赖
+npm install
+
 # 可选：设置 JWT 密钥（生产环境必须）
 export JWT_SECRET="your-secret-key-here"
 
-cargo run
+# 开发模式（自动重载）
+npm run dev
+
+# 或生产模式
+npm run build && npm start
 # 服务监听 http://0.0.0.0:8080
 ```
 
@@ -100,7 +107,6 @@ docker run --rm -v investment-tracker-server_investment-data:/data -v $(pwd):/ba
 | `PORT` | `8080` | 服务端口 |
 | `JWT_SECRET` | 硬编码默认值 | **生产环境必须修改** |
 | `DATA_DIR` | `/app/data` | 数据目录 |
-| `RUST_LOG` | `info` | 日志级别 |
 
 ## 使用说明
 

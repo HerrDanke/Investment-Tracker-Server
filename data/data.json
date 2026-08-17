@@ -1,494 +1,53 @@
 {
   "assets": [
-    {
-      "id": 7,
-      "name": "Wise Assets Europe",
-      "symbol": "",
-      "asset_type": "fund",
-      "currency": "EUR",
-      "created_at": "2026-08-15T09:16:05.369Z",
-      "updated_at": "2026-08-15T17:27:54.675978700+00:00"
-    },
-    {
-      "id": 6,
-      "name": "Xiaomi",
-      "symbol": "KYG9830T1067",
-      "asset_type": "stock",
-      "currency": "EUR",
-      "created_at": "2026-07-07T00:00:00.000Z",
-      "updated_at": "2026-08-15T09:09:04.091Z"
-    },
-    {
-      "id": 3,
-      "name": "FTSE All-World USD (Acc)",
-      "symbol": "IE00BK5BQT80",
-      "asset_type": "fund",
-      "currency": "EUR",
-      "created_at": "2026-06-24T00:00:00.000Z",
-      "updated_at": "2026-08-15T08:17:32.751Z"
-    },
-    {
-      "id": 4,
-      "name": "Global Aggregate Bond EUR (Acc)",
-      "symbol": "IE00BDBRDM35",
-      "asset_type": "fund",
-      "currency": "EUR",
-      "created_at": "2026-06-24T00:00:00.000Z",
-      "updated_at": "2026-08-15T08:17:32.751Z"
-    },
-    {
-      "id": 5,
-      "name": "BYD",
-      "symbol": "CNE100000296",
-      "asset_type": "stock",
-      "currency": "EUR",
-      "created_at": "2026-06-24T00:00:00.000Z",
-      "updated_at": "2026-08-15T08:17:32.751Z"
-    },
-    {
-      "id": 2,
-      "name": "AMD",
-      "symbol": "US0079031078",
-      "asset_type": "stock",
-      "currency": "EUR",
-      "created_at": "2025-08-12T00:00:00.000Z",
-      "updated_at": "2026-08-15T08:17:32.751Z"
-    },
-    {
-      "id": 1,
-      "name": "NVIDIA",
-      "symbol": "US67066G1040",
-      "asset_type": "stock",
-      "currency": "EUR",
-      "created_at": "2025-07-03T00:00:00.000Z",
-      "updated_at": "2026-08-15T08:17:32.750Z"
-    }
+    {"id":7,"name":"Wise Assets Europe","symbol":"","type":"fund","currency":"EUR","createdAt":"2026-08-15T09:16:05.369Z","updatedAt":"2026-08-15T09:16:05.369Z"},
+    {"id":6,"name":"Xiaomi","symbol":"KYG9830T1067","type":"stock","currency":"EUR","createdAt":"2026-07-07T00:00:00.000Z","updatedAt":"2026-08-15T09:09:04.091Z"},
+    {"id":3,"name":"FTSE All-World USD (Acc)","symbol":"IE00BK5BQT80","type":"fund","currency":"EUR","createdAt":"2026-06-24T00:00:00.000Z","updatedAt":"2026-08-15T08:17:32.751Z"},
+    {"id":4,"name":"Global Aggregate Bond EUR (Acc)","symbol":"IE00BDBRDM35","type":"fund","currency":"EUR","createdAt":"2026-06-24T00:00:00.000Z","updatedAt":"2026-08-15T08:17:32.751Z"},
+    {"id":5,"name":"BYD","symbol":"CNE100000296","type":"stock","currency":"EUR","createdAt":"2026-06-24T00:00:00.000Z","updatedAt":"2026-08-15T08:17:32.751Z"},
+    {"id":2,"name":"AMD","symbol":"US0079031078","type":"stock","currency":"EUR","createdAt":"2025-08-12T00:00:00.000Z","updatedAt":"2026-08-15T08:17:32.751Z"},
+    {"id":1,"name":"NVIDIA","symbol":"US67066G1040","type":"stock","currency":"EUR","createdAt":"2025-07-03T00:00:00.000Z","updatedAt":"2026-08-15T08:17:32.750Z"}
   ],
   "transactions": [
-    {
-      "id": 13,
-      "asset_id": 4,
-      "txn_type": "BUY",
-      "date": "2026-08-03",
-      "price": 4.8945,
-      "quantity": 30.646644,
-      "fee": 0.0,
-      "tax": 0.0,
-      "currency": "EUR",
-      "notes": "Savings plan IE00BDBRDM35",
-      "created_at": "2026-08-15T08:17:32.751Z",
-      "updated_at": "2026-08-15T08:17:32.751Z"
-    },
-    {
-      "id": 14,
-      "asset_id": 3,
-      "txn_type": "BUY",
-      "date": "2026-08-03",
-      "price": 164.9195,
-      "quantity": 2.425425,
-      "fee": 0.0,
-      "tax": 0.0,
-      "currency": "EUR",
-      "notes": "Savings plan IE00BK5BQT80",
-      "created_at": "2026-08-15T08:17:32.751Z",
-      "updated_at": "2026-08-15T08:17:32.751Z"
-    },
-    {
-      "id": 12,
-      "asset_id": 6,
-      "txn_type": "SELL",
-      "date": "2026-07-27",
-      "price": 3.211,
-      "quantity": 384.837406,
-      "fee": 1.0,
-      "tax": 61.64,
-      "currency": "EUR",
-      "notes": "Sell KYG9830T1067",
-      "created_at": "2026-08-15T08:17:32.751Z",
-      "updated_at": "2026-08-15T08:17:32.751Z"
-    },
-    {
-      "id": 11,
-      "asset_id": 6,
-      "txn_type": "BUY",
-      "date": "2026-07-07",
-      "price": 2.5985,
-      "quantity": 384.837406,
-      "fee": 1.0,
-      "tax": 0.0,
-      "currency": "EUR",
-      "notes": "Buy KYG9830T1067",
-      "created_at": "2026-08-15T08:17:32.751Z",
-      "updated_at": "2026-08-15T08:17:32.751Z"
-    },
-    {
-      "id": 9,
-      "asset_id": 4,
-      "txn_type": "BUY",
-      "date": "2026-07-02",
-      "price": 4.9291,
-      "quantity": 30.431518,
-      "fee": 0.0,
-      "tax": 0.0,
-      "currency": "EUR",
-      "notes": "Savings plan IE00BDBRDM35",
-      "created_at": "2026-08-15T08:17:32.751Z",
-      "updated_at": "2026-08-15T08:17:32.751Z"
-    },
-    {
-      "id": 10,
-      "asset_id": 3,
-      "txn_type": "BUY",
-      "date": "2026-07-02",
-      "price": 165.502,
-      "quantity": 2.416889,
-      "fee": 0.0,
-      "tax": 0.0,
-      "currency": "EUR",
-      "notes": "Savings plan IE00BK5BQT80",
-      "created_at": "2026-08-15T08:17:32.751Z",
-      "updated_at": "2026-08-15T08:17:32.751Z"
-    },
-    {
-      "id": 6,
-      "asset_id": 3,
-      "txn_type": "BUY",
-      "date": "2026-06-24",
-      "price": 164.22,
-      "quantity": 36.505232,
-      "fee": 1.0,
-      "tax": 0.0,
-      "currency": "EUR",
-      "notes": "Buy IE00BK5BQT80",
-      "created_at": "2026-08-15T08:17:32.751Z",
-      "updated_at": "2026-08-15T08:17:32.751Z"
-    },
-    {
-      "id": 7,
-      "asset_id": 4,
-      "txn_type": "BUY",
-      "date": "2026-06-24",
-      "price": 4.9453,
-      "quantity": 404.457117,
-      "fee": 1.0,
-      "tax": 0.0,
-      "currency": "EUR",
-      "notes": "Buy IE00BDBRDM35",
-      "created_at": "2026-08-15T08:17:32.751Z",
-      "updated_at": "2026-08-15T08:17:32.751Z"
-    },
-    {
-      "id": 8,
-      "asset_id": 5,
-      "txn_type": "BUY",
-      "date": "2026-06-24",
-      "price": 8.567,
-      "quantity": 58.356676,
-      "fee": 1.0,
-      "tax": 0.0,
-      "currency": "EUR",
-      "notes": "Buy CNE100000296 BYD",
-      "created_at": "2026-08-15T08:17:32.751Z",
-      "updated_at": "2026-08-15T08:17:32.751Z"
-    },
-    {
-      "id": 22,
-      "asset_id": 7,
-      "txn_type": "BUY",
-      "date": "2026-06-18",
-      "price": 10000.0,
-      "quantity": 1.0,
-      "fee": 0.0,
-      "tax": 0.0,
-      "currency": "EUR",
-      "notes": "MSCI World tracker",
-      "created_at": "2026-08-15T09:16:46.998Z",
-      "updated_at": "2026-08-15T09:29:22.850Z"
-    },
-    {
-      "id": 4,
-      "asset_id": 2,
-      "txn_type": "SELL",
-      "date": "2025-08-12",
-      "price": 148.96,
-      "quantity": 3.0,
-      "fee": 1.0,
-      "tax": 9.46,
-      "currency": "EUR",
-      "notes": "Sell US0079031078 AMD",
-      "created_at": "2026-08-15T08:17:32.751Z",
-      "updated_at": "2026-08-15T08:17:32.751Z"
-    },
-    {
-      "id": 5,
-      "asset_id": 2,
-      "txn_type": "SELL",
-      "date": "2025-08-12",
-      "price": 148.96,
-      "quantity": 0.652633,
-      "fee": 0.0,
-      "tax": 2.17,
-      "currency": "EUR",
-      "notes": "Sell US0079031078 AMD",
-      "created_at": "2026-08-15T08:17:32.751Z",
-      "updated_at": "2026-08-15T08:17:32.751Z"
-    },
-    {
-      "id": 2,
-      "asset_id": 1,
-      "txn_type": "SELL",
-      "date": "2025-08-07",
-      "price": 154.8,
-      "quantity": 3.0,
-      "fee": 1.0,
-      "tax": 13.38,
-      "currency": "EUR",
-      "notes": "Sell US67066G1040 NVIDIA",
-      "created_at": "2026-08-15T08:17:32.751Z",
-      "updated_at": "2026-08-15T08:17:32.751Z"
-    },
-    {
-      "id": 3,
-      "asset_id": 1,
-      "txn_type": "SELL",
-      "date": "2025-08-07",
-      "price": 154.8,
-      "quantity": 0.643783,
-      "fee": 0.0,
-      "tax": 2.98,
-      "currency": "EUR",
-      "notes": "Sell US67066G1040 NVIDIA",
-      "created_at": "2026-08-15T08:17:32.751Z",
-      "updated_at": "2026-08-15T08:17:32.751Z"
-    },
-    {
-      "id": 20,
-      "asset_id": 1,
-      "txn_type": "DIVIDEND",
-      "date": "2025-07-03",
-      "price": 0.0,
-      "quantity": 3.643783,
-      "fee": 0.0,
-      "tax": 0.01,
-      "currency": "EUR",
-      "notes": "NVIDIA dividend",
-      "created_at": "2026-08-15T08:35:47.886Z",
-      "updated_at": "2026-08-15T08:35:47.886Z"
-    },
-    {
-      "id": 21,
-      "asset_id": 1,
-      "txn_type": "DIVIDEND",
-      "date": "2025-04-02",
-      "price": 0.0,
-      "quantity": 3.643783,
-      "fee": 0.0,
-      "tax": 0.01,
-      "currency": "EUR",
-      "notes": "NVIDIA dividend",
-      "created_at": "2026-08-15T08:36:02.933Z",
-      "updated_at": "2026-08-15T08:36:02.933Z"
-    },
-    {
-      "id": 15,
-      "asset_id": 1,
-      "txn_type": "BUY",
-      "date": "2024-12-05",
-      "price": 137.22,
-      "quantity": 3.0,
-      "fee": 1.0,
-      "tax": 0.0,
-      "currency": "EUR",
-      "notes": "Buy US67066G1040 NVIDIA",
-      "created_at": "2026-08-15T08:28:38.073Z",
-      "updated_at": "2026-08-15T08:28:38.074Z"
-    },
-    {
-      "id": 16,
-      "asset_id": 1,
-      "txn_type": "BUY",
-      "date": "2024-12-05",
-      "price": 137.22,
-      "quantity": 0.643783,
-      "fee": 0.0,
-      "tax": 0.0,
-      "currency": "EUR",
-      "notes": "Buy US67066G1040 NVIDIA",
-      "created_at": "2026-08-15T08:28:38.074Z",
-      "updated_at": "2026-08-15T08:28:38.074Z"
-    },
-    {
-      "id": 17,
-      "asset_id": 2,
-      "txn_type": "BUY",
-      "date": "2024-12-05",
-      "price": 136.34,
-      "quantity": 0.652633,
-      "fee": 0.0,
-      "tax": 0.0,
-      "currency": "EUR",
-      "notes": "Buy US0079031078 AMD",
-      "created_at": "2026-08-15T08:28:38.074Z",
-      "updated_at": "2026-08-15T08:28:38.074Z"
-    },
-    {
-      "id": 18,
-      "asset_id": 2,
-      "txn_type": "BUY",
-      "date": "2024-12-05",
-      "price": 136.34,
-      "quantity": 3.0,
-      "fee": 1.0,
-      "tax": 0.0,
-      "currency": "EUR",
-      "notes": "Buy US0079031078 AMD",
-      "created_at": "2026-08-15T08:28:38.074Z",
-      "updated_at": "2026-08-15T08:28:38.074Z"
-    }
+    {"id":13,"assetId":4,"type":"BUY","date":"2026-08-03","price":4.8945,"quantity":30.646644,"fee":0,"tax":0,"currency":"EUR","notes":"Savings plan IE00BDBRDM35","createdAt":"2026-08-15T08:17:32.751Z","updatedAt":"2026-08-15T08:17:32.751Z"},
+    {"id":14,"assetId":3,"type":"BUY","date":"2026-08-03","price":164.9195,"quantity":2.425425,"fee":0,"tax":0,"currency":"EUR","notes":"Savings plan IE00BK5BQT80","createdAt":"2026-08-15T08:17:32.751Z","updatedAt":"2026-08-15T08:17:32.751Z"},
+    {"id":12,"assetId":6,"type":"SELL","date":"2026-07-27","price":3.211,"quantity":384.837406,"fee":1,"tax":61.64,"currency":"EUR","notes":"Sell KYG9830T1067","createdAt":"2026-08-15T08:17:32.751Z","updatedAt":"2026-08-15T08:17:32.751Z"},
+    {"id":11,"assetId":6,"type":"BUY","date":"2026-07-07","price":2.5985,"quantity":384.837406,"fee":1,"tax":0,"currency":"EUR","notes":"Buy KYG9830T1067","createdAt":"2026-08-15T08:17:32.751Z","updatedAt":"2026-08-15T08:17:32.751Z"},
+    {"id":9,"assetId":4,"type":"BUY","date":"2026-07-02","price":4.9291,"quantity":30.431518,"fee":0,"tax":0,"currency":"EUR","notes":"Savings plan IE00BDBRDM35","createdAt":"2026-08-15T08:17:32.751Z","updatedAt":"2026-08-15T08:17:32.751Z"},
+    {"id":10,"assetId":3,"type":"BUY","date":"2026-07-02","price":165.502,"quantity":2.416889,"fee":0,"tax":0,"currency":"EUR","notes":"Savings plan IE00BK5BQT80","createdAt":"2026-08-15T08:17:32.751Z","updatedAt":"2026-08-15T08:17:32.751Z"},
+    {"id":6,"assetId":3,"type":"BUY","date":"2026-06-24","price":164.22,"quantity":36.505232,"fee":1,"tax":0,"currency":"EUR","notes":"Buy IE00BK5BQT80","createdAt":"2026-08-15T08:17:32.751Z","updatedAt":"2026-08-15T08:17:32.751Z"},
+    {"id":7,"assetId":4,"type":"BUY","date":"2026-06-24","price":4.9453,"quantity":404.457117,"fee":1,"tax":0,"currency":"EUR","notes":"Buy IE00BDBRDM35","createdAt":"2026-08-15T08:17:32.751Z","updatedAt":"2026-08-15T08:17:32.751Z"},
+    {"id":8,"assetId":5,"type":"BUY","date":"2026-06-24","price":8.567,"quantity":58.356676,"fee":1,"tax":0,"currency":"EUR","notes":"Buy CNE100000296 BYD","createdAt":"2026-08-15T08:17:32.751Z","updatedAt":"2026-08-15T08:17:32.751Z"},
+    {"id":22,"assetId":7,"type":"BUY","date":"2026-06-18","price":10000,"quantity":1,"fee":0,"tax":0,"currency":"EUR","notes":"MSCI World tracker","createdAt":"2026-08-15T09:16:46.998Z","updatedAt":"2026-08-15T09:29:22.850Z"},
+    {"id":4,"assetId":2,"type":"SELL","date":"2025-08-12","price":148.96,"quantity":3,"fee":1,"tax":9.46,"currency":"EUR","notes":"Sell US0079031078 AMD","createdAt":"2026-08-15T08:17:32.751Z","updatedAt":"2026-08-15T08:17:32.751Z"},
+    {"id":5,"assetId":2,"type":"SELL","date":"2025-08-12","price":148.96,"quantity":0.652633,"fee":0,"tax":2.17,"currency":"EUR","notes":"Sell US0079031078 AMD","createdAt":"2026-08-15T08:17:32.751Z","updatedAt":"2026-08-15T08:17:32.751Z"},
+    {"id":2,"assetId":1,"type":"SELL","date":"2025-08-07","price":154.8,"quantity":3,"fee":1,"tax":13.38,"currency":"EUR","notes":"Sell US67066G1040 NVIDIA","createdAt":"2026-08-15T08:17:32.751Z","updatedAt":"2026-08-15T08:17:32.751Z"},
+    {"id":3,"assetId":1,"type":"SELL","date":"2025-08-07","price":154.8,"quantity":0.643783,"fee":0,"tax":2.98,"currency":"EUR","notes":"Sell US67066G1040 NVIDIA","createdAt":"2026-08-15T08:17:32.751Z","updatedAt":"2026-08-15T08:17:32.751Z"},
+    {"id":20,"assetId":1,"type":"DIVIDEND","date":"2025-07-03","price":0,"quantity":3.643783,"fee":0,"tax":0.01,"currency":"EUR","notes":"NVIDIA dividend","createdAt":"2026-08-15T08:35:47.886Z","updatedAt":"2026-08-15T08:35:47.886Z"},
+    {"id":21,"assetId":1,"type":"DIVIDEND","date":"2025-04-02","price":0,"quantity":3.643783,"fee":0,"tax":0.01,"currency":"EUR","notes":"NVIDIA dividend","createdAt":"2026-08-15T08:36:02.933Z","updatedAt":"2026-08-15T08:36:02.933Z"},
+    {"id":15,"assetId":1,"type":"BUY","date":"2024-12-05","price":137.22,"quantity":3,"fee":1,"tax":0,"currency":"EUR","notes":"Buy US67066G1040 NVIDIA","createdAt":"2026-08-15T08:28:38.073Z","updatedAt":"2026-08-15T08:28:38.074Z"},
+    {"id":16,"assetId":1,"type":"BUY","date":"2024-12-05","price":137.22,"quantity":0.643783,"fee":0,"tax":0,"currency":"EUR","notes":"Buy US67066G1040 NVIDIA","createdAt":"2026-08-15T08:28:38.074Z","updatedAt":"2026-08-15T08:28:38.074Z"},
+    {"id":17,"assetId":2,"type":"BUY","date":"2024-12-05","price":136.34,"quantity":0.652633,"fee":0,"tax":0,"currency":"EUR","notes":"Buy US0079031078 AMD","createdAt":"2026-08-15T08:28:38.074Z","updatedAt":"2026-08-15T08:28:38.074Z"},
+    {"id":18,"assetId":2,"type":"BUY","date":"2024-12-05","price":136.34,"quantity":3,"fee":1,"tax":0,"currency":"EUR","notes":"Buy US0079031078 AMD","createdAt":"2026-08-15T08:28:38.074Z","updatedAt":"2026-08-15T08:28:38.074Z"}
   ],
   "tags": [
-    {
-      "id": 10,
-      "name": "定投",
-      "category": "custom",
-      "color": "#0EA5E9"
-    },
-    {
-      "id": 4,
-      "name": "港股",
-      "category": "system",
-      "color": "#F59E0B"
-    },
-    {
-      "id": 9,
-      "name": "股票",
-      "category": "system",
-      "color": "#EC4899"
-    },
-    {
-      "id": 1,
-      "name": "基金",
-      "category": "system",
-      "color": "#3B82F6"
-    },
-    {
-      "id": 7,
-      "name": "加密货币",
-      "category": "system",
-      "color": "#F97316"
-    },
-    {
-      "id": 2,
-      "name": "宽基指数",
-      "category": "system",
-      "color": "#8B5CF6"
-    },
-    {
-      "id": 5,
-      "name": "美股",
-      "category": "system",
-      "color": "#10B981"
-    },
-    {
-      "id": 6,
-      "name": "债券",
-      "category": "system",
-      "color": "#6366F1"
-    },
-    {
-      "id": 3,
-      "name": "A股",
-      "category": "system",
-      "color": "#EF4444"
-    },
-    {
-      "id": 8,
-      "name": "ETF",
-      "category": "system",
-      "color": "#14B8A6"
-    }
+    {"id":10,"name":"定投","category":"custom","color":"#0EA5E9"},
+    {"id":4,"name":"港股","category":"system","color":"#F59E0B"},
+    {"id":9,"name":"股票","category":"system","color":"#EC4899"},
+    {"id":1,"name":"基金","category":"system","color":"#3B82F6"},
+    {"id":7,"name":"加密货币","category":"system","color":"#F97316"},
+    {"id":2,"name":"宽基指数","category":"system","color":"#8B5CF6"},
+    {"id":5,"name":"美股","category":"system","color":"#10B981"},
+    {"id":6,"name":"债券","category":"system","color":"#6366F1"},
+    {"id":3,"name":"A股","category":"system","color":"#EF4444"},
+    {"id":8,"name":"ETF","category":"system","color":"#14B8A6"}
   ],
-  "asset_tags": [
-    {
-      "asset_id": 1,
-      "tag_id": 9
-    },
-    {
-      "asset_id": 1,
-      "tag_id": 5
-    },
-    {
-      "asset_id": 2,
-      "tag_id": 9
-    },
-    {
-      "asset_id": 2,
-      "tag_id": 5
-    },
-    {
-      "asset_id": 3,
-      "tag_id": 1
-    },
-    {
-      "asset_id": 3,
-      "tag_id": 2
-    },
-    {
-      "asset_id": 3,
-      "tag_id": 8
-    },
-    {
-      "asset_id": 4,
-      "tag_id": 1
-    },
-    {
-      "asset_id": 4,
-      "tag_id": 8
-    },
-    {
-      "asset_id": 5,
-      "tag_id": 9
-    },
-    {
-      "asset_id": 6,
-      "tag_id": 9
-    },
-    {
-      "asset_id": 6,
-      "tag_id": 4
-    },
-    {
-      "asset_id": 3,
-      "tag_id": 10
-    },
-    {
-      "asset_id": 4,
-      "tag_id": 10
-    },
-    {
-      "asset_id": 5,
-      "tag_id": 4
-    },
-    {
-      "asset_id": 4,
-      "tag_id": 2
-    },
-    {
-      "asset_id": 7,
-      "tag_id": 1
-    },
-    {
-      "asset_id": 7,
-      "tag_id": 8
-    },
-    {
-      "asset_id": 7,
-      "tag_id": 2
-    }
+  "assetTags": [
+    {"assetId":1,"tagId":9},{"assetId":1,"tagId":5},{"assetId":2,"tagId":9},{"assetId":2,"tagId":5},
+    {"assetId":3,"tagId":1},{"assetId":3,"tagId":2},{"assetId":3,"tagId":8},{"assetId":4,"tagId":1},
+    {"assetId":4,"tagId":8},{"assetId":5,"tagId":9},{"assetId":6,"tagId":9},{"assetId":6,"tagId":4},
+    {"assetId":3,"tagId":10},{"assetId":4,"tagId":10},{"assetId":5,"tagId":4},{"assetId":7,"tagId":1},
+    {"assetId":7,"tagId":8},{"assetId":4,"tagId":2}
   ],
-  "_seq": {
-    "assets": 7,
-    "transactions": 22,
-    "tags": 10
-  }
+  "_seq": {"assets":7,"transactions":22,"tags":10}
 }

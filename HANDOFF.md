@@ -10,7 +10,7 @@
 
 | 层级 | 技术 |
 |------|------|
-| 后端 | Rust + Axum 0.7 + Tokio |
+| 后端 | Node.js + Fastify + TypeScript |
 | 认证 | Argon2 密码哈希 + JWT (HS256, 7天有效期) |
 | 存储 | 文件 JSON（`data.json` + `users.json`） |
 | 前端 | React 18 + Vite 5 + TypeScript + TailwindCSS + Recharts + @dnd-kit |
@@ -19,46 +19,40 @@
 
 ```
 Investment Tracker Server/
-├── .gitignore                    # 排除 target/、node_modules/、dist/
-├── README.md                     # 项目文档
-├── Cargo.toml
-├── Cargo.lock
-├── HANDOFF.md                    # 本文件
-├── src/                          # Rust 后端源码
-│   ├── main.rs                   # 入口、路由组装、中间件
-│   ├── lib.rs                    # 模块声明
-│   ├── models.rs                 # 数据模型（Asset/Transaction/Tag/User/Claims等）
-│   ├── db.rs                     # AppState + 文件持久化（异步 IO）
-│   ├── auth.rs                   # 密码哈希 + JWT 生成/验证（HS256 明确算法）
-│   ├── middleware.rs             # JWT 鉴权中间件
-│   ├── error.rs                  # AppError（内部错误不暴露详情）
-│   └── handlers/
-│       ├── mod.rs                # 路由聚合
-│       ├── auth.rs               # POST /api/auth/register, /api/auth/login
-│       ├── assets.rs             # CRUD /api/assets + 标签关联
-│       ├── transactions.rs       # CRUD /api/transactions（含参数校验）
-│       ├── tags.rs               # CRUD /api/tags
-│       ├── summary.rs            # GET /api/summary
-│       └── export_import.rs      # GET /api/export, POST /api/import（10MB 限制）
-├── data/                         # 数据文件目录
-│   ├── data.json                 # 投资数据（资产/交易/标签）
-│   └── users.json                # 用户数据（id/用户名/密码哈希）
-├── web-frontend/                 # React 前端
-│   ├── public/                   # 静态资源（图标）
-│   │   ├── icon.svg
-│   │   ├── icon.png
-│   │   └── favicon.ico
+├── .gitignore
+├── .dockerignore
+├── README.md
+├── HANDOFF.md
+├── DEPLOY.md
+├── Dockerfile
+├── docker-compose.yml
+├── package.json
+├── package-lock.json
+├── tsconfig.json
+├── src/
+│   ├── index.ts              # 入口：Fastify 服务启动
+│   ├── types.ts              # TypeScript 类型定义
+│   ├── db.ts                 # 数据库层：JSON 文件读写
+│   ├── plugins/
+│   │   └── auth.ts           # JWT 认证插件
+│   └── routes/
+│       ├── auth.ts           # 注册/登录
+│       ├── assets.ts         # 资产 CRUD + 标签
+│       ├── transactions.ts   # 交易 CRUD + 过滤
+│       ├── tags.ts           # 标签 CRUD
+│       ├── summary.ts        # 投资汇总统计
+│       └── export-import.ts  # 数据导出导入
+├── data/                     # 数据文件目录
+│   ├── data.json             # 投资数据
+│   └── users.json            # 用户数据
+├── web-frontend/             # React 前端
 │   ├── src/
-│   │   ├── App.tsx               # 路由 + AuthProvider + ErrorBoundary
-│   │   ├── context/AuthContext.tsx  # 认证上下文（useMemo 优化）
-│   │   ├── pages/                # Dashboard/Assets/Tags/Transactions/Login
-│   │   ├── components/           # Sidebar/Layout/DataModal/KanbanCard/ErrorBoundary
-│   │   ├── lib/                  # api.ts（拦截器）/utils.ts/dashboard-layout.ts
-│   │   ├── types/index.ts        # 类型定义
-│   │   └── index.css             # 全局样式 + 深色模式覆盖
+│   ├── public/
 │   ├── package.json
-│   └── vite.config.ts            # 代理 /api → localhost:8080
-└── .superpowers/                 # Superpowers 配置（不提交）
+│   └── vite.config.ts
+└── scripts/
+    ├── build.ps1
+    └── deploy.sh
 ```
 
 ## 数据模型
@@ -135,7 +129,10 @@ GET /api/transactions?assetId=1&type=buy&startDate=2024-01-01&endDate=2024-12-31
 
 ```bash
 cd Investment-Tracker-Server
-cargo run
+npm install
+npm run dev      # 开发模式（tsx watch）
+# 或
+npm run build && npm start  # 生产模式
 # 服务监听 http://0.0.0.0:8080
 ```
 
@@ -161,13 +158,12 @@ npm run build
 - [x] 用户注册/登录（Argon2 哈希 + JWT）
 - [x] 密码验证（至少6字符，两次输入一致性检查）
 - [x] 用户名唯一性检查（至少3字符）
-- [x] JWT 鉴权中间件（保护 /api/assets 等业务接口）
+- [x] JWT 认证插件（保护 /api/assets 等业务接口）
 - [x] 资产 CRUD + 标签关联
 - [x] 交易 CRUD（买入/卖出/分红）
 - [x] 标签 CRUD（分类+颜色）
 - [x] 投资汇总统计（总投入/盈亏/持仓分布）
 - [x] 数据导出/导入（JSON 格式）
-- [x] 死锁修复（写锁作用域隔离，persist 前释放）
 
 ### 前端
 - [x] 登录/注册页面（表单验证+错误提示）
@@ -188,7 +184,15 @@ npm run build
 - [x] ErrorBoundary 错误边界（全局渲染异常捕获）
 - [x] AuthContext useMemo 优化（避免无意义重渲染）
 
-## 最近修复（2026-08-17 代码审查）
+## 最近修复（2026-08-17 重构为 Node.js）
+
+- 后端从 Rust + Axum 迁移到 Node.js + Fastify + TypeScript
+- 移除 Cargo.toml / Cargo.lock / Rust src/ 代码
+- 更新 Dockerfile 使用 Node.js 18 运行时（无需编译）
+- 保持所有 API 端点、数据格式、认证逻辑完全兼容
+- 数据库层使用 fs/promises + 原子写入（temp file + rename）
+- JWT 使用 @fastify/jwt，argon2 使用 node-argon2
+- 前端代码不变
 
 | 问题 | 修复 | 文件 |
 |------|------|------|
