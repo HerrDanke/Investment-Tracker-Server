@@ -51,17 +51,34 @@ export function ChartCard({ title, data, initialChartType = 'bar', onChartTypeCh
             </BarChart>
           </ResponsiveContainer>
         );
-      case 'pie':
+      case 'pie': {
+        const total = data.reduce((sum, d) => sum + d.value, 0);
+        // 自定义标签：显示名称 + 百分比，带引导线
+        const renderLabel = ({ cx, cy, midAngle, outerRadius, name, percent, index }: any) => {
+          if (percent < 0.03) return null; // 小于3%不显示标签，避免重叠
+          const RADIAN = Math.PI / 180;
+          const radius = outerRadius + 30;
+          const x = cx + radius * Math.cos(-midAngle * RADIAN);
+          const y = cy + radius * Math.sin(-midAngle * RADIAN);
+          const anchor = x > cx ? 'start' : 'end';
+          return (
+            <text x={x} y={y} textAnchor={anchor} fontSize={10} fill="currentColor" className="text-zinc-600 dark:text-zinc-400">
+              {name.length > 6 ? name.slice(0, 6) + '…' : name} ({(percent * 100).toFixed(0)}%)
+            </text>
+          );
+        };
+
         return (
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={75} label={(e) => e.name}>
+              <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={65} label={renderLabel} labelLine={{ stroke: '#a1a1aa', strokeWidth: 1 }}>
                 {data.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
               </Pie>
               <Tooltip formatter={(v: number) => fmt(v)} />
             </PieChart>
           </ResponsiveContainer>
         );
+      }
       case 'line':
         return (
           <ResponsiveContainer width="100%" height={220}>
