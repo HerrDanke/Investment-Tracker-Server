@@ -1,6 +1,6 @@
 # Investment Tracker Server - Handoff
 
-> 最后更新：2026-08-17
+> 最后更新：2026-08-17（第二次更新）
 
 ## 项目概述
 
@@ -163,7 +163,7 @@ npm run build
 ### 前端
 - [x] 登录/注册页面（表单验证+错误提示）
 - [x] 路由保护（未登录跳转 /login）
-- [x] JWT 自动附加（axios 拦截器）
+- [x] JWT 自动附加（axios 拦截器，已移至自定义实例）
 - [x] 401 自动跳转登录页
 - [x] Notion 风格看板 Dashboard（@dnd-kit 拖拽）
 - [x] 7 种卡片类型（stats/chart-holdings/chart-type/chart-currency/chart-tags/recent-trades/holdings）
@@ -171,9 +171,20 @@ npm run build
 - [x] 交易表格列宽调整（双竖线手柄 + localStorage 持久化）
 - [x] 数据导出（File System Access API 路径选择弹窗）
 - [x] 数据导入（文件选择 + 全局刷新）
-- [x] 深色模式（zinc 色系，localStorage 持久化）
+- [x] 深色模式（zinc 色系，localStorage 持久化，文本可读性优化）
 - [x] 侧栏固定高度 + 用户信息显示 + 退出登录
 - [x] 概览统计卡片 + 柱状图/饼图
+- [x] 网页图标（使用桌面端 icon.svg）
+- [x] DataModal 路由冲突修复（移出 Routes）
+
+## 最近修复（2026-08-17）
+
+| 问题 | 修复 |
+|------|------|
+| 登录后 401 | axios 拦截器从全局移至自定义实例 |
+| 数据管理弹窗不响应 | DataModal 从 Route 中移出 |
+| 深色模式文字难读 | 全局 CSS 覆盖 text-zinc-400/500/600 |
+| 网页无图标 | 添加 icon.svg/favicon.ico |
 
 ## 已知限制
 
@@ -205,6 +216,15 @@ npm run build
 
 ### 深色模式不生效
 **原因**：检查 localStorage theme 值。Tailwind 配置 `darkMode: 'class'`。
+
+## Git 历史
+
+```
+04eefb4 feat: 添加用户认证系统、深色模式优化、Web图标
+b7fd8e4 feat: Web 前端与桌面端功能对齐
+29c75eb feat: Web 前端完成 - 端到端验证通过
+... (历史提交)
+```
 
 ## 访问地址
 
