@@ -30,11 +30,11 @@
 
 ### 启动后端
 
-```powershell
-cd "E:\FN_Syn\Projects\Investment Tracker Server"
+```bash
+cd Investment-Tracker-Server
 
 # 可选：设置 JWT 密钥（生产环境必须）
-$env:JWT_SECRET="your-secret-key-here"
+export JWT_SECRET="your-secret-key-here"
 
 cargo run
 # 服务监听 http://0.0.0.0:8080
@@ -42,8 +42,8 @@ cargo run
 
 ### 启动前端
 
-```powershell
-cd "E:\FN_Syn\Projects\Investment Tracker Server\web-frontend"
+```bash
+cd Investment-Tracker-Server/web-frontend
 npm install
 npm run dev
 # 访问 http://localhost:5173
@@ -51,8 +51,8 @@ npm run dev
 
 ### 生产构建
 
-```powershell
-cd "E:\FN_Syn\Projects\Investment Tracker Server\web-frontend"
+```bash
+cd Investment-Tracker-Server/web-frontend
 npm run build
 # 产物在 dist/ 目录
 ```

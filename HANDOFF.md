@@ -133,24 +133,24 @@ GET /api/transactions?assetId=1&type=buy&startDate=2024-01-01&endDate=2024-12-31
 
 ### 后端
 
-```powershell
-cd "E:\FN_Syn\Projects\Investment Tracker Server"
+```bash
+cd Investment-Tracker-Server
 cargo run
 # 服务监听 http://0.0.0.0:8080
 ```
 
 ### 前端
 
-```powershell
-cd "E:\FN_Syn\Projects\Investment Tracker Server\web-frontend"
+```bash
+cd Investment-Tracker-Server/web-frontend
 npm run dev
 # 访问 http://localhost:5173
 ```
 
 ### 生产构建前端
 
-```powershell
-cd "E:\FN_Syn\Projects\Investment Tracker Server\web-frontend"
+```bash
+cd Investment-Tracker-Server/web-frontend
 npm run build
 # 产物在 dist/，可用 vite preview 或任意静态服务器托管
 ```
