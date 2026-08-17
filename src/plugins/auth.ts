@@ -7,6 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
   throw new Error('JWT_SECRET environment variable is required');
 }
+const JWT_SECRET_VALUE: string = JWT_SECRET;
 const TOKEN_EXPIRY = '7d';
 
 export interface AuthUser {
@@ -29,7 +30,7 @@ declare module '@fastify/jwt' {
 
 async function authPlugin(app: import('fastify').FastifyInstance) {
   app.register(fastifyJwt, {
-    secret: JWT_SECRET,
+    secret: JWT_SECRET_VALUE,
     sign: {
       expiresIn: TOKEN_EXPIRY,
     },
