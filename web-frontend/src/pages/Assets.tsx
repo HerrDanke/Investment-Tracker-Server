@@ -1,18 +1,21 @@
-import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2 } from 'lucide-react';
-import { assetApi } from '../lib/api';
+import { useState, useEffect, useMemo } from 'react';
+import { Plus, Edit2, Trash2, Filter, X } from 'lucide-react';
+import { assetApi, tagApi } from '../lib/api';
 import { TYPE_LABELS } from '../lib/utils';
-import type { AssetWithTags } from '../types';
+import type { AssetWithTags, Tag } from '../types';
 import AssetForm from '../components/AssetForm';
 
 export default function Assets() {
   const [assets, setAssets] = useState<AssetWithTags[]>([]);
+  const [allTags, setAllTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingAsset, setEditingAsset] = useState<AssetWithTags | undefined>();
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
+  const [showFilter, setShowFilter] = useState(false);
 
-  useEffect(() => { loadAssets() }, []);
+  useEffect(() => { loadAssets(); loadTags(); }, []);
 
   async function loadAssets() {
     try {
@@ -24,6 +27,33 @@ export default function Assets() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function loadTags() {
+    try {
+      const data = await tagApi.list();
+      setAllTags(data);
+    } catch (e: any) {
+      console.error('加载标签失败:', e.message);
+    }
+  }
+
+  // 根据选中的标签筛选资产
+  const filteredAssets = useMemo(() => {
+    if (selectedTagIds.length === 0) return assets;
+    return assets.filter(asset =>
+      selectedTagIds.every(tagId => asset.tags.some(tag => tag.id === tagId))
+    );
+  }, [assets, selectedTagIds]);
+
+  function toggleTagFilter(tagId: number) {
+    setSelectedTagIds(prev =>
+      prev.includes(tagId) ? prev.filter(id => id !== tagId) : [...prev, tagId]
+    );
+  }
+
+  function clearFilter() {
+    setSelectedTagIds([]);
   }
 
   async function handleDelete(id: number) {
@@ -57,17 +87,75 @@ export default function Assets() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">资产管理</h1>
-        <button onClick={openCreate}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-          <Plus size={18} /> 新增资产
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setShowFilter(!showFilter)}
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              selectedTagIds.length > 0
+                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+            }`}>
+            <Filter size={16} />
+            筛选
+            {selectedTagIds.length > 0 && <span className="ml-1 px-1.5 py-0.5 bg-blue-600 text-white text-xs rounded-full">{selectedTagIds.length}</span>}
+          </button>
+          <button onClick={openCreate}
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 rounded-lg text-sm font-medium hover:opacity-90">
+            <Plus size={18} /> 新增资产
+          </button>
+        </div>
       </div>
 
-      {assets.length === 0 ? (
-        <div className="text-center py-12 text-zinc-400">暂无资产，点击上方按钮添加</div>
+      {/* 标签筛选面板 */}
+      {showFilter && allTags.length > 0 && (
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">按标签筛选</span>
+            {selectedTagIds.length > 0 && (
+              <button onClick={clearFilter}
+                className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
+                <X size={14} /> 清除筛选
+              </button>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {allTags.map(tag => {
+              const isActive = selectedTagIds.includes(tag.id);
+              return (
+                <button key={tag.id}
+                  onClick={() => toggleTagFilter(tag.id)}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                    isActive
+                      ? 'text-white shadow-sm'
+                      : 'text-zinc-600 dark:text-zinc-400 border border-zinc-300 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500'
+                  }`}
+                  style={isActive ? { backgroundColor: tag.color } : {}}>
+                  {tag.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* 筛选结果提示 */}
+      {selectedTagIds.length > 0 && (
+        <div className="text-sm text-zinc-500 dark:text-zinc-400">
+          显示 {filteredAssets.length} / {assets.length} 个资产
+          {selectedTagIds.length > 0 && (
+            <span className="ml-2">
+              （已选标签：{selectedTagIds.map(id => allTags.find(t => t.id === id)?.name).filter(Boolean).join(' + ')}）
+            </span>
+          )}
+        </div>
+      )}
+
+      {filteredAssets.length === 0 ? (
+        <div className="text-center py-12 text-zinc-400">
+          {selectedTagIds.length > 0 ? '没有符合筛选条件的资产' : '暂无资产，点击上方按钮添加'}
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {assets.map(asset => (
+          {filteredAssets.map(asset => (
             <div key={asset.id} className="bg-white dark:bg-zinc-900 rounded-xl p-5 shadow-sm border border-zinc-200 dark:border-zinc-800">
               <div className="flex items-start justify-between mb-3">
                 <div>
