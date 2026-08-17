@@ -1,6 +1,6 @@
 # Multi-stage build for Investment Tracker Server
 # Stage 1: Build frontend
-FROM node:18-slim AS frontend-build
+FROM node:20-slim AS frontend-build
 WORKDIR /app
 COPY web-frontend/package.json web-frontend/package-lock.json ./
 RUN npm ci
@@ -10,7 +10,7 @@ RUN chmod +x node_modules/.bin/* 2>/dev/null || true
 RUN npm run build
 
 # Stage 2: Build backend (TypeScript)
-FROM node:18-slim AS backend-build
+FROM node:20-slim AS backend-build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -20,7 +20,7 @@ RUN npm run build
 COPY --from=frontend-build /app/dist ./public
 
 # Stage 3: Final runtime image
-FROM node:18-slim
+FROM node:20-slim
 RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 RUN useradd --create-home app
 WORKDIR /app
