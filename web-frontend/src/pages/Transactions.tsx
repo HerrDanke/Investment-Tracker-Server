@@ -92,9 +92,10 @@ export default function Transactions() {
 
     const handleMove = (ev: MouseEvent) => {
       if (!resizingRef.current) return;
-      const diff = ev.clientX - resizingRef.current.startX;
-      const newWidth = Math.max(50, resizingRef.current.startWidth + diff);
-      setColWidths(prev => ({ ...prev, [resizingRef.current!.col]: newWidth }));
+      const { col, startX, startWidth } = resizingRef.current;
+      const diff = ev.clientX - startX;
+      const newWidth = Math.max(50, startWidth + diff);
+      setColWidths(prev => ({ ...prev, [col]: newWidth }));
     };
 
     const handleUp = () => {
@@ -213,18 +214,19 @@ function ResizableTh({ col, label, width, align, resizing, onResize }: {
 }) {
   return (
     <th
-      className={`relative py-3 px-4 font-medium text-zinc-500 select-none group`}
+      className="relative py-3 px-4 font-medium text-zinc-500 select-none"
       style={{ width: width + 'px', minWidth: '50px' }}
     >
-      <span className={`flex items-center gap-1 ${align === 'right' ? 'flex-row-reverse' : ''} ${align === 'center' ? 'justify-center' : ''}`}>
-        <span>{label}</span>
-        <span
-          className="relative flex-shrink-0 self-stretch w-3 cursor-col-resize flex items-center justify-center gap-px"
-          onMouseDown={(e) => onResize(e, col)}
-        >
-          <span className={`w-px h-4 transition-colors duration-150 ${resizing ? 'bg-blue-500' : 'bg-zinc-300 dark:bg-zinc-600 group-hover:bg-zinc-500'}`} />
-          <span className={`w-px h-4 transition-colors duration-150 ${resizing ? 'bg-blue-500' : 'bg-zinc-300 dark:bg-zinc-600 group-hover:bg-zinc-500'}`} />
-        </span>
+      <span className={`flex items-center ${align === 'right' ? 'justify-end' : ''} ${align === 'center' ? 'justify-center' : ''}`}>
+        <span className="truncate">{label}</span>
+      </span>
+      {/* 列宽调整手柄 - 位于列右侧边缘 */}
+      <span
+        className={`absolute right-0 top-0 bottom-0 w-3 cursor-col-resize flex items-center justify-center gap-px z-10 ${resizing ? 'bg-blue-500/10' : 'hover:bg-zinc-200/50 dark:hover:bg-zinc-700/50'}`}
+        onMouseDown={(e) => onResize(e, col)}
+      >
+        <span className={`w-px h-5 transition-colors duration-150 ${resizing ? 'bg-blue-500' : 'bg-zinc-300 dark:bg-zinc-600 group-hover:bg-zinc-500'}`} />
+        <span className={`w-px h-5 transition-colors duration-150 ${resizing ? 'bg-blue-500' : 'bg-zinc-300 dark:bg-zinc-600 group-hover:bg-zinc-500'}`} />
       </span>
     </th>
   );
