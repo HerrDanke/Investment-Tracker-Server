@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
-import type { Transaction, CreateTransaction, UpdateTransaction, TransactionWithAsset, TransactionQuery } from '../types';
+import type { Transaction, CreateTransaction, UpdateTransaction, TransactionWithAsset } from '../types';
 
-const VALID_TXN_TYPES = ['buy', 'sell', 'dividend', 'BUY', 'SELL', 'DIVIDEND'];
+const VALID_TXN_TYPES = ['buy', 'sell', 'dividend'];
 
 export default async function transactionRoutes(app: FastifyInstance) {
   const db = app.db;

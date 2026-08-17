@@ -3,7 +3,10 @@ import fastifyJwt from '@fastify/jwt';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { JwtPayload } from '../types';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'investment-tracker-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required');
+}
 const TOKEN_EXPIRY = '7d';
 
 export interface AuthUser {

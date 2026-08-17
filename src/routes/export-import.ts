@@ -1,5 +1,8 @@
 import type { FastifyInstance } from 'fastify';
 import type { Database } from '../types';
+import { promises as fs } from 'fs';
+import path from 'path';
+import { serializeDatabase } from '../db';
 
 const MAX_IMPORT_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -114,6 +117,23 @@ export default async function exportImportRoutes(app: FastifyInstance) {
         })),
         _seq: imported._seq ?? { assets: 0, transactions: 0, tags: 0 },
       };
+
+      // Create backup before overwriting
+      try {
+        const dataDir = path.dirname((db as any).dataPath);
+        const backupPath = path.join(dataDir, `data-backup-${Date.now()}.json`);
+        const currentData = serializeDatabase(db.getDatabase());
+        await fs.writeFile(backupPath, currentData, 'utf-8');
+        // Keep only last 5 backups
+        const files = await fs.readdir(dataDir);
+        const backups = files.filter(f => f.startsWith('data-backup-')).sort();
+        while (backups.length > 5) {
+          const oldest = backups.shift();
+          if (oldest) await fs.unlink(path.join(dataDir, oldest));
+        }
+      } catch (backupErr: any) {
+        console.warn('Failed to create backup before import:', backupErr.message);
+      }
 
       await db.updateDatabase(normalizedDb);
       return reply.send({ success: true });

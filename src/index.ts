@@ -39,9 +39,10 @@ async function buildServer() {
   await dbManager.init();
   app.decorate('db', dbManager);
 
-  // Register CORS
+  // Register CORS - use whitelist in production
+  const allowedOrigins = process.env.CORS_ORIGINS?.split(',') || [];
   await app.register(cors, {
-    origin: true,
+    origin: allowedOrigins.length > 0 ? allowedOrigins : true,
     credentials: true,
   });
 

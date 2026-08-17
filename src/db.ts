@@ -69,7 +69,7 @@ function parseDatabase(json: string): Database {
 }
 
 // Serialize database to JSON (output format matches frontend expectations)
-function serializeDatabase(db: Database): string {
+export function serializeDatabase(db: Database): string {
   const output = {
     assets: db.assets.map(a => ({
       id: a.id,
@@ -174,9 +174,14 @@ class DatabaseManager {
     const json = serializeDatabase(this.db);
     // Queue writes to prevent race conditions
     this.writeQueue = this.writeQueue.then(async () => {
-      const tmpPath = this.dataPath + '.tmp';
-      await fs.writeFile(tmpPath, json, 'utf-8');
-      await fs.rename(tmpPath, this.dataPath);
+      try {
+        const tmpPath = this.dataPath + '.tmp';
+        await fs.writeFile(tmpPath, json, 'utf-8');
+        await fs.rename(tmpPath, this.dataPath);
+      } catch (err: any) {
+        console.error('Failed to persist database:', err);
+        throw new Error('数据保存失败: ' + (err.message || '未知错误'));
+      }
     });
     return this.writeQueue;
   }
@@ -185,9 +190,14 @@ class DatabaseManager {
   private async persistUsers(): Promise<void> {
     const json = JSON.stringify(this.users, null, 2);
     this.writeQueue = this.writeQueue.then(async () => {
-      const tmpPath = this.usersPath + '.tmp';
-      await fs.writeFile(tmpPath, json, 'utf-8');
-      await fs.rename(tmpPath, this.usersPath);
+      try {
+        const tmpPath = this.usersPath + '.tmp';
+        await fs.writeFile(tmpPath, json, 'utf-8');
+        await fs.rename(tmpPath, this.usersPath);
+      } catch (err: any) {
+        console.error('Failed to persist users:', err);
+        throw new Error('用户数据保存失败: ' + (err.message || '未知错误'));
+      }
     });
     return this.writeQueue;
   }

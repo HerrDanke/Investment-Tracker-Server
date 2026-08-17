@@ -1,7 +1,10 @@
-# Rust build artifacts
+# Rust build artifacts (legacy)
 /target/
 **/*.rs.bk
 *.pdb
+Cargo.toml
+Cargo.lock
+src-tauri/
 
 # Node modules and build
 node_modules/
@@ -18,6 +21,9 @@ dist/
 Thumbs.db
 .DS_Store
 
-# Data (optional - uncomment if you don't want to commit data)
-# data/data.json
-# data/users.json
+# Data
+data/*.json
+data-backup-*.json
+
+# Scripts (keep deploy.sh but ignore local test scripts)
+scripts/test-*.sh

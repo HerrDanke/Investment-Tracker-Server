@@ -11,19 +11,23 @@ JWT_SECRET="${JWT_SECRET:-$(openssl rand -hex 32)}"
 
 echo "=== Installing dependencies ==="
 apt-get update
-apt-get install -y build-essential pkg-config libssl-dev cargo nodejs npm
+apt-get install -y nodejs npm
 
 echo "=== Creating application directory ==="
 mkdir -p "$APP_DIR/data"
 
-echo "=== Building application ==="
+echo "=== Installing Node.js dependencies ==="
 cd "$APP_DIR"
-cargo build --release --manifest-path Cargo.toml
+npm ci --production
+
+echo "=== Building application ==="
+npm run build
 
 echo "=== Building frontend ==="
 cd "$APP_DIR/web-frontend"
 npm ci
 npm run build
+mkdir -p "$APP_DIR/dist"
 cp -r dist/* "$APP_DIR/dist/"
 
 echo "=== Creating systemd service ==="
@@ -36,10 +40,11 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=$APP_DIR
+Environment=NODE_ENV=production
 Environment=PORT=$PORT
 Environment=JWT_SECRET=$JWT_SECRET
 Environment=DATA_DIR=$APP_DIR/data
-ExecStart=$APP_DIR/target/release/investment-tracker-server
+ExecStart=/usr/bin/node $APP_DIR/dist/index.js
 Restart=always
 RestartSec=5
 
