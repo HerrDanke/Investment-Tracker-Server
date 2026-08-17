@@ -1,56 +1,57 @@
-import { useState, useEffect } from 'react'
-import { Plus, Edit2, Trash2 } from 'lucide-react'
-import { assetApi } from '../lib/api'
-import type { AssetWithTags } from '../types'
-import AssetForm from '../components/AssetForm'
+import { useState, useEffect } from 'react';
+import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { assetApi } from '../lib/api';
+import { TYPE_LABELS } from '../lib/utils';
+import type { AssetWithTags } from '../types';
+import AssetForm from '../components/AssetForm';
 
 export default function Assets() {
-  const [assets, setAssets] = useState<AssetWithTags[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [showForm, setShowForm] = useState(false)
-  const [editingAsset, setEditingAsset] = useState<AssetWithTags | undefined>()
+  const [assets, setAssets] = useState<AssetWithTags[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const [editingAsset, setEditingAsset] = useState<AssetWithTags | undefined>();
 
-  useEffect(() => { loadAssets() }, [])
+  useEffect(() => { loadAssets() }, []);
 
   async function loadAssets() {
     try {
-      setLoading(true)
-      const data = await assetApi.list()
-      setAssets(data)
+      setLoading(true);
+      const data = await assetApi.list();
+      setAssets(data);
     } catch (e: any) {
-      setError(e.message)
+      setError(e.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function handleDelete(id: number) {
-    if (!confirm('确定删除该资产及其所有交易记录？')) return
+    if (!confirm('确定删除该资产及其所有交易记录？')) return;
     try {
-      await assetApi.delete(id)
-      loadAssets()
+      await assetApi.delete(id);
+      loadAssets();
     } catch (e: any) {
-      alert('删除失败: ' + e.message)
+      alert('删除失败: ' + e.message);
     }
   }
 
   function openEdit(asset: AssetWithTags) {
-    setEditingAsset(asset)
-    setShowForm(true)
+    setEditingAsset(asset);
+    setShowForm(true);
   }
 
   function openCreate() {
-    setEditingAsset(undefined)
-    setShowForm(true)
+    setEditingAsset(undefined);
+    setShowForm(true);
   }
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
     </div>
-  )
-  if (error) return <div className="text-red-500">加载失败: {error}</div>
+  );
+  if (error) return <div className="text-red-500">加载失败: {error}</div>;
 
   return (
     <div className="space-y-6">
@@ -63,28 +64,28 @@ export default function Assets() {
       </div>
 
       {assets.length === 0 ? (
-        <div className="text-center py-12 text-gray-400">暂无资产，点击上方按钮添加</div>
+        <div className="text-center py-12 text-zinc-400">暂无资产，点击上方按钮添加</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {assets.map(asset => (
-            <div key={asset.id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+            <div key={asset.id} className="bg-white dark:bg-zinc-900 rounded-xl p-5 shadow-sm border border-zinc-200 dark:border-zinc-800">
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <h3 className="font-semibold text-lg">{asset.name}</h3>
-                  {asset.symbol && <span className="text-sm text-gray-400">{asset.symbol}</span>}
+                  {asset.symbol && <span className="text-sm text-zinc-400">{asset.symbol}</span>}
                 </div>
                 <div className="flex gap-1">
-                  <button onClick={() => openEdit(asset)} className="p-1 hover:bg-gray-100 rounded">
-                    <Edit2 size={16} className="text-gray-400" />
+                  <button onClick={() => openEdit(asset)} className="p-1 hover:bg-zinc-100 rounded">
+                    <Edit2 size={16} className="text-zinc-400" />
                   </button>
-                  <button onClick={() => handleDelete(asset.id)} className="p-1 hover:bg-gray-100 rounded">
+                  <button onClick={() => handleDelete(asset.id)} className="p-1 hover:bg-zinc-100 rounded">
                     <Trash2 size={16} className="text-red-400" />
                   </button>
                 </div>
               </div>
-              <div className="flex gap-2 text-sm text-gray-500 mb-3">
-                <span className="px-2 py-0.5 bg-gray-100 rounded">{asset.assetType}</span>
-                <span className="px-2 py-0.5 bg-gray-100 rounded">{asset.currency}</span>
+              <div className="flex gap-2 text-sm text-zinc-500 mb-3">
+                <span className="px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded">{TYPE_LABELS[asset.asset_type] || asset.asset_type}</span>
+                <span className="px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded">{asset.currency}</span>
               </div>
               {asset.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1">
@@ -103,10 +104,10 @@ export default function Assets() {
 
       {showForm && (
         <AssetForm asset={editingAsset} onClose={() => setShowForm(false)} onSave={() => {
-          setShowForm(false)
-          loadAssets()
+          setShowForm(false);
+          loadAssets();
         }} />
       )}
     </div>
-  )
+  );
 }

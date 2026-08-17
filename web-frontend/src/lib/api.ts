@@ -25,7 +25,7 @@ export const assetApi = {
 }
 
 export const transactionApi = {
-  list: (params?: { assetId?: number; txnType?: string; startDate?: string; endDate?: string }) =>
+  list: (params?: { asset_id?: number; txn_type?: string; start_date?: string; end_date?: string }) =>
     api.get<TransactionWithAsset[]>('/transactions', { params }).then(r => r.data),
   get: (id: number) => api.get<TransactionWithAsset>(`/transactions/${id}`).then(r => r.data),
   create: (data: CreateTransaction) => api.post('/transactions', data).then(r => r.data),
