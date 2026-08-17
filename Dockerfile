@@ -10,15 +10,17 @@ RUN chmod +x node_modules/.bin/* 2>/dev/null || true
 RUN npm run build
 
 # Stage 2: Build Rust backend
-FROM rust:1.80-slim AS backend-build
+# Step 2a: Build dependencies only (cached layer)
+FROM rust:1.80-slim AS backend-deps
 RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY Cargo.toml Cargo.lock ./
-# Build dependencies cache layer
 RUN mkdir src && echo "fn main() {}" > src/main.rs \
     && cargo build --release \
     && rm -rf src
-# Build actual project
+
+# Step 2b: Build actual project (deps already cached)
+FROM backend-deps AS backend-build
 COPY src/ src/
 COPY --from=frontend-build /app/dist ./dist
 RUN touch src/main.rs && cargo build --release
