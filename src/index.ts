@@ -51,9 +51,23 @@ async function buildServer() {
   // Health check
   app.get('/api/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
 
-  // Root endpoint
-  app.get('/', async (request, reply) => {
-    return reply.type('text/html').send(`<!DOCTYPE html>
+  // Serve static frontend files from public/ directory
+  const publicPath = path.join(__dirname, '..', 'public');
+  try {
+    await fs.access(publicPath);
+    await app.register(fastifyStatic, {
+      root: publicPath,
+      prefix: '/',
+    });
+    // Serve index.html for root path
+    app.get('/', async (request, reply) => {
+      return reply.sendFile('index.html');
+    });
+  } catch {
+    app.log.warn('public/ directory not found. Static file serving disabled.');
+    // Fallback root endpoint
+    app.get('/', async (request, reply) => {
+      return reply.type('text/html').send(`<!DOCTYPE html>
 <html>
 <head><title>Investment Tracker Server</title></head>
 <body>
@@ -70,27 +84,14 @@ async function buildServer() {
 <li><a href="/api/export">/api/export</a> - Export data (requires auth)</li>
 </ul>
 </body></html>`);
-  });
-
-  // Register routes
+    });
+  }
   await app.register(authRoutes, { prefix: '/api' });
   await app.register(assetRoutes, { prefix: '/api' });
   await app.register(transactionRoutes, { prefix: '/api' });
   await app.register(tagRoutes, { prefix: '/api' });
   await app.register(summaryRoutes, { prefix: '/api' });
   await app.register(exportImportRoutes, { prefix: '/api' });
-
-  // Serve static frontend files from dist/ directory
-  const distPath = path.join(__dirname, '..', 'dist');
-  try {
-    await fs.access(distPath);
-    await app.register(fastifyStatic, {
-      root: distPath,
-      prefix: '/',
-    });
-  } catch {
-    app.log.warn('dist/ directory not found. Static file serving disabled.');
-  }
 
   return app;
 }
