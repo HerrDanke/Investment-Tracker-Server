@@ -36,9 +36,9 @@ export default async function transactionRoutes(app: FastifyInstance) {
         txns = txns.filter((t) => t.date <= endDate);
       }
 
-      const result: TransactionWithAsset[] = txns.map((t) => {
+      const result: any[] = txns.map((t) => {
         const asset = database.assets.find((a) => a.id === t.asset_id) ?? null;
-        return { transaction: t, asset };
+        return { ...t, asset };
       });
 
       return reply.send(result);
@@ -127,7 +127,7 @@ export default async function transactionRoutes(app: FastifyInstance) {
       }
 
       const asset = database.assets.find((a) => a.id === txn.asset_id) ?? null;
-      return reply.send({ transaction: txn, asset });
+      return reply.send({ ...txn, asset });
     }
   );
 

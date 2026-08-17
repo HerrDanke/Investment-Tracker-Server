@@ -68,37 +68,36 @@ function parseDatabase(json: string): Database {
   return { assets, transactions, tags, asset_tags, _seq: seq };
 }
 
-// Serialize database to JSON (preserving original data.json format)
+// Serialize database to JSON (output format matches frontend expectations)
 function serializeDatabase(db: Database): string {
-  // Output in the same format as the original data.json (camelCase for some fields)
   const output = {
     assets: db.assets.map(a => ({
       id: a.id,
       name: a.name,
-      symbol: a.symbol ?? '',
-      type: a.asset_type,
+      symbol: a.symbol ?? null,
+      asset_type: a.asset_type,
       currency: a.currency,
-      createdAt: a.created_at,
-      updatedAt: a.updated_at,
+      created_at: a.created_at,
+      updated_at: a.updated_at,
     })),
     transactions: db.transactions.map(t => ({
       id: t.id,
-      assetId: t.asset_id,
-      type: t.txn_type,
+      asset_id: t.asset_id,
+      txn_type: t.txn_type,
       date: t.date,
       price: t.price,
       quantity: t.quantity,
       fee: t.fee,
       tax: t.tax,
       currency: t.currency,
-      notes: t.notes ?? '',
-      createdAt: t.created_at,
-      updatedAt: t.updated_at,
+      notes: t.notes ?? null,
+      created_at: t.created_at,
+      updated_at: t.updated_at,
     })),
     tags: db.tags,
-    assetTags: db.asset_tags.map(at => ({
-      assetId: at.asset_id,
-      tagId: at.tag_id,
+    asset_tags: db.asset_tags.map(at => ({
+      asset_id: at.asset_id,
+      tag_id: at.tag_id,
     })),
     _seq: db._seq,
   };

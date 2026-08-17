@@ -9,35 +9,35 @@ export default async function exportImportRoutes(app: FastifyInstance) {
   // GET /api/export - Export all data
   app.get('/export', { onRequest: [app.authenticate] }, async (request, reply) => {
     const database = db.getDatabase();
-    // Use the same serialization format as data.json (camelCase)
+    // Output in snake_case format (matches frontend expectations)
     const output = {
       assets: database.assets.map(a => ({
         id: a.id,
         name: a.name,
-        symbol: a.symbol ?? '',
-        type: a.asset_type,
+        symbol: a.symbol ?? null,
+        asset_type: a.asset_type,
         currency: a.currency,
-        createdAt: a.created_at,
-        updatedAt: a.updated_at,
+        created_at: a.created_at,
+        updated_at: a.updated_at,
       })),
       transactions: database.transactions.map(t => ({
         id: t.id,
-        assetId: t.asset_id,
-        type: t.txn_type,
+        asset_id: t.asset_id,
+        txn_type: t.txn_type,
         date: t.date,
         price: t.price,
         quantity: t.quantity,
         fee: t.fee,
         tax: t.tax,
         currency: t.currency,
-        notes: t.notes ?? '',
-        createdAt: t.created_at,
-        updatedAt: t.updated_at,
+        notes: t.notes ?? null,
+        created_at: t.created_at,
+        updated_at: t.updated_at,
       })),
       tags: database.tags,
-      assetTags: database.asset_tags.map(at => ({
-        assetId: at.asset_id,
-        tagId: at.tag_id,
+      asset_tags: database.asset_tags.map(at => ({
+        asset_id: at.asset_id,
+        tag_id: at.tag_id,
       })),
       _seq: database._seq,
     };

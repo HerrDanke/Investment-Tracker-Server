@@ -29,8 +29,7 @@ export interface Transaction {
   updated_at: string;
 }
 
-export interface TransactionWithAsset {
-  transaction: Transaction;
+export interface TransactionWithAsset extends Transaction {
   asset: Asset | null;
 }
 
