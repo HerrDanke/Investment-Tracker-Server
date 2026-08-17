@@ -9,12 +9,14 @@ COPY web-frontend/ ./
 RUN chmod +x node_modules/.bin/* 2>/dev/null || true
 RUN npm run build
 
-# Stage 2: Install backend dependencies
+# Stage 2: Build backend (TypeScript)
 FROM node:18-slim AS backend-build
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --production
-COPY dist ./dist
+RUN npm ci
+COPY tsconfig.json ./
+COPY src/ src/
+RUN npm run build
 COPY --from=frontend-build /app/dist ./public
 
 # Stage 3: Final runtime image
@@ -22,7 +24,10 @@ FROM node:18-slim
 RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 RUN useradd --create-home app
 WORKDIR /app
-COPY --from=backend-build /app ./
+COPY --from=backend-build /app/dist ./dist
+COPY --from=backend-build /app/public ./public
+COPY --from=backend-build /app/node_modules ./node_modules
+COPY --from=backend-build /app/package.json ./package.json
 RUN mkdir -p /app/data && chown -R app:app /app
 USER app
 
