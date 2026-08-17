@@ -167,7 +167,7 @@ export default function Transactions() {
               <tr><td colSpan={9} className="py-12 text-center text-zinc-400">暂无交易记录</td></tr>
             )}
             {transactions.map(txn => {
-              const amount = txn.txn_type === 'DIVIDEND' ? 0 : txn.price * txn.quantity + txn.fee + txn.tax;
+              const amount = txn.txn_type === 'DIVIDEND' ? 0 : (txn.price || 0) * (txn.quantity || 0) + (txn.fee || 0) + (txn.tax || 0);
               return (
                 <tr key={txn.id} className="border-b border-zinc-50 dark:border-zinc-800/50 hover:bg-zinc-50 dark:hover:bg-zinc-800/30">
                   <td className="py-3 px-4 truncate" style={{ width: getColWidth('date') + 'px' }}>{txn.date}</td>
@@ -177,9 +177,9 @@ export default function Transactions() {
                       {TXN_LABELS[txn.txn_type] || txn.txn_type}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-right truncate" style={{ width: getColWidth('price') + 'px' }}>{txn.price.toFixed(2)}</td>
+                  <td className="py-3 px-4 text-right truncate" style={{ width: getColWidth('price') + 'px' }}>{txn.price?.toFixed(2) ?? '-'}</td>
                   <td className="py-3 px-4 text-right truncate" style={{ width: getColWidth('quantity') + 'px' }}>{txn.quantity}</td>
-                  <td className="py-3 px-4 text-right truncate" style={{ width: getColWidth('fee') + 'px' }}>{txn.fee.toFixed(2)}</td>
+                  <td className="py-3 px-4 text-right truncate" style={{ width: getColWidth('fee') + 'px' }}>{txn.fee?.toFixed(2) ?? '-'}</td>
                   <td className="py-3 px-4 text-right truncate" style={{ width: getColWidth('amount') + 'px' }}>{txn.txn_type === 'DIVIDEND' ? '-' : fmt(amount)}</td>
                   <td className="py-3 px-4 text-zinc-400 truncate" style={{ width: getColWidth('notes') + 'px' }}>{txn.notes || '-'}</td>
                   <td className="py-3 px-4 text-center" style={{ width: getColWidth('actions') + 'px' }}>
