@@ -49,7 +49,7 @@ export default function Transactions() {
       if (filterAsset) params.asset_id = filterAsset;
       if (filterType) params.txn_type = filterType;
       const data = await transactionApi.list(params);
-      data.sort((a, b) => b.date.localeCompare(a.date));
+      data.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
       setTransactions(data);
     } catch (e: any) {
       setError(e.message);
