@@ -68,8 +68,8 @@ npm run build
 
 ```bash
 # 克隆项目
-git clone https://github.com/InSeong-So/Investment-Tracker.git
-cd Investment-Tracker
+git clone https://github.com/HerrDanke/Investment-Tracker-Server.git
+cd Investment-Tracker-Server
 
 # 设置生产环境 JWT 密钥
 echo "JWT_SECRET=$(openssl rand -hex 32)" > .env
@@ -87,10 +87,10 @@ docker compose logs -f
 
 ```bash
 # 备份数据卷
-docker run --rm -v investment-tracker_investment-data:/data -v $(pwd):/backup alpine tar czf /backup/backup-$(date +%Y%m%d).tar.gz -C /data .
+docker run --rm -v investment-tracker-server_investment-data:/data -v $(pwd):/backup alpine tar czf /backup/backup-$(date +%Y%m%d).tar.gz -C /data .
 
 # 恢复数据
-docker run --rm -v investment-tracker_investment-data:/data -v $(pwd):/backup alpine tar xzf /backup/backup-20260817.tar.gz -C /data
+docker run --rm -v investment-tracker-server_investment-data:/data -v $(pwd):/backup alpine tar xzf /backup/backup-20260817.tar.gz -C /data
 ```
 
 ### 配置
