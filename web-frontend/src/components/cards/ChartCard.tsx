@@ -14,9 +14,10 @@ interface ChartCardProps {
   data: ChartDataItem[];
   initialChartType?: ChartType;
   onChartTypeChange?: (type: ChartType) => void;
+  lang?: string;
 }
 
-export function ChartCard({ title, data, initialChartType = 'bar', onChartTypeChange }: ChartCardProps) {
+export function ChartCard({ title, data, initialChartType = 'bar', onChartTypeChange, lang = 'zh' }: ChartCardProps) {
   const [chartType, setChartType] = useState<ChartType>(initialChartType);
 
   const handleTypeChange = () => {
@@ -34,7 +35,7 @@ export function ChartCard({ title, data, initialChartType = 'bar', onChartTypeCh
 
   const renderChart = () => {
     if (data.length === 0) {
-      return <div className="flex items-center justify-center h-full text-zinc-400 text-sm">暂无数据</div>;
+      return <div className="flex items-center justify-center h-full text-zinc-400 text-sm">{lang === 'en' ? 'No data' : '暂无数据'}</div>;
     }
 
     switch (chartType) {

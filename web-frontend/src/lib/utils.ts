@@ -1,34 +1,41 @@
 // ==================== FORMATTING ====================
 
-const currencyFormatter = new Intl.NumberFormat('zh-CN', {
-  style: 'currency',
-  currency: 'EUR',
-  minimumFractionDigits: 2,
-});
+export function fmt(v: number, lang: string = 'zh'): string {
+  return new Intl.NumberFormat(lang === 'zh' ? 'zh-CN' : 'en-US', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2,
+  }).format(v);
+}
 
-export const fmt = (v: number): string => currencyFormatter.format(v);
-
-export const fmtK = (v: number): string => {
+export function fmtK(v: number): string {
   if (v >= 1000) return '€' + (v / 1000).toFixed(1) + 'k';
   return '€' + v.toFixed(0);
-};
+}
 
+export function getTypeLabel(type: string, lang: string = 'zh'): string {
+  const labels: Record<string, Record<string, string>> = {
+    zh: { stock: '股票', fund: '基金', etf: 'ETF', bond: '债券', crypto: '加密货币', other: '其他' },
+    en: { stock: 'Stock', fund: 'Fund', etf: 'ETF', bond: 'Bond', crypto: 'Crypto', other: 'Other' },
+  };
+  return labels[lang]?.[type] || type;
+}
+
+export function getTxnLabel(type: string, lang: string = 'zh'): string {
+  const labels: Record<string, Record<string, string>> = {
+    zh: { BUY: '买入', SELL: '卖出', DIVIDEND: '分红', INTEREST: '利息', SPLIT: '拆分', OTHER: '其他' },
+    en: { BUY: 'Buy', SELL: 'Sell', DIVIDEND: 'Dividend', INTEREST: 'Interest', SPLIT: 'Split', OTHER: 'Other' },
+  };
+  return labels[lang]?.[type] || type;
+}
+
+// Legacy exports (defaults to Chinese for backward compatibility)
 export const TYPE_LABELS: Record<string, string> = {
-  stock: '股票',
-  fund: '基金',
-  etf: 'ETF',
-  bond: '债券',
-  crypto: '加密货币',
-  other: '其他',
+  stock: '股票', fund: '基金', etf: 'ETF', bond: '债券', crypto: '加密货币', other: '其他',
 };
 
 export const TXN_LABELS: Record<string, string> = {
-  BUY: '买入',
-  SELL: '卖出',
-  DIVIDEND: '分红',
-  INTEREST: '利息',
-  SPLIT: '拆分',
-  OTHER: '其他',
+  BUY: '买入', SELL: '卖出', DIVIDEND: '分红', INTEREST: '利息', SPLIT: '拆分', OTHER: '其他',
 };
 
 export const PIE_COLORS = [

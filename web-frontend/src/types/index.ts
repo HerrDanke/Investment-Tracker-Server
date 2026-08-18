@@ -124,6 +124,55 @@ export const DEFAULT_LAYOUT: DashboardLayout = {
   ]
 };
 
+export function getCardTitle(type: CardType, lang: string = 'zh'): string {
+  const titles: Record<string, Record<CardType, string>> = {
+    zh: {
+      'stats': '投资概览',
+      'chart-holdings': '资产持仓分布',
+      'chart-type': '资产类型分布',
+      'chart-currency': '货币分布',
+      'recent-trades': '最近交易',
+      'holdings': '持仓明细',
+      'chart-tags': '标签分布',
+    },
+    en: {
+      'stats': 'Overview',
+      'chart-holdings': 'Holdings',
+      'chart-type': 'By Type',
+      'chart-currency': 'By Currency',
+      'recent-trades': 'Recent Trades',
+      'holdings': 'Holdings Detail',
+      'chart-tags': 'By Tag',
+    },
+  };
+  return titles[lang]?.[type] || type;
+}
+
+export function getAvailableCards(lang: string = 'zh'): { type: CardType; label: string; description: string }[] {
+  const cards: Record<string, { type: CardType; label: string; description: string }[]> = {
+    zh: [
+      { type: 'stats', label: '投资概览', description: '总投入、持仓成本、盈亏等核心数据' },
+      { type: 'chart-holdings', label: '资产持仓分布', description: '各资产持仓成本图表' },
+      { type: 'chart-type', label: '资产类型分布', description: '按资产类型分类统计' },
+      { type: 'chart-currency', label: '货币分布', description: '按货币分类统计' },
+      { type: 'chart-tags', label: '标签分布', description: '按标签分类统计' },
+      { type: 'recent-trades', label: '最近交易', description: '最近 5 笔交易记录' },
+      { type: 'holdings', label: '持仓明细', description: '所有持仓资产及盈亏' },
+    ],
+    en: [
+      { type: 'stats', label: 'Overview', description: 'Investment, cost basis, P&L' },
+      { type: 'chart-holdings', label: 'Holdings', description: 'Cost by asset' },
+      { type: 'chart-type', label: 'By Type', description: 'Distribution by asset type' },
+      { type: 'chart-currency', label: 'By Currency', description: 'Distribution by currency' },
+      { type: 'chart-tags', label: 'By Tag', description: 'Distribution by tag' },
+      { type: 'recent-trades', label: 'Recent Trades', description: 'Last 5 transactions' },
+      { type: 'holdings', label: 'Holdings Detail', description: 'All holdings with P&L' },
+    ],
+  };
+  return cards[lang] || cards.zh;
+}
+
+// Legacy exports (defaults to Chinese)
 export const CARD_TITLES: Record<CardType, string> = {
   'stats': '投资概览',
   'chart-holdings': '资产持仓分布',

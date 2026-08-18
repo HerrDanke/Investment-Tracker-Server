@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { KeyRound, Eye, EyeOff } from 'lucide-react';
 import { passwordApi } from '../lib/api';
+import { useLang } from '../context/LanguageContext';
 
 export default function Password() {
+  const { t } = useLang();
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -18,15 +20,15 @@ export default function Password() {
     setSuccess('');
 
     if (!oldPassword || !newPassword || !confirmPassword) {
-      setError('所有字段不能为空');
+      setError(t('common.failed'));
       return;
     }
     if (newPassword.length < 6) {
-      setError('新密码至少6个字符');
+      setError(t('password.too_short'));
       return;
     }
     if (newPassword !== confirmPassword) {
-      setError('两次新密码输入不一致');
+      setError(t('password.mismatch'));
       return;
     }
 
@@ -37,12 +39,12 @@ export default function Password() {
         new_password: newPassword,
         new_password_confirm: confirmPassword,
       });
-      setSuccess('密码修改成功');
+      setSuccess(t('password.success'));
       setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (err: any) {
-      setError(err.response?.data?.error || '密码修改失败');
+      setError(err.response?.data?.error || t('common.failed'));
     } finally {
       setLoading(false);
     }
@@ -52,7 +54,7 @@ export default function Password() {
     <div className="max-w-md mx-auto">
       <div className="flex items-center gap-3 mb-6">
         <KeyRound className="text-blue-600" size={24} />
-        <h1 className="text-2xl font-bold">修改密码</h1>
+        <h1 className="text-2xl font-bold">{t('password.title')}</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-6 space-y-4">
@@ -68,14 +70,14 @@ export default function Password() {
         )}
 
         <div>
-          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">旧密码</label>
+          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{t('common.old_password')}</label>
           <div className="relative">
             <input
               type={showOld ? 'text' : 'password'}
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
               className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="输入当前密码"
+              placeholder={t('password.old_placeholder')}
             />
             <button
               type="button"
@@ -88,14 +90,14 @@ export default function Password() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">新密码</label>
+          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{t('common.new_password')}</label>
           <div className="relative">
             <input
               type={showNew ? 'text' : 'password'}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="至少6个字符"
+              placeholder={t('password.new_placeholder')}
             />
             <button
               type="button"
@@ -108,13 +110,13 @@ export default function Password() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">确认新密码</label>
+          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{t('common.confirm_password')}</label>
           <input
             type={showNew ? 'text' : 'password'}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="再次输入新密码"
+            placeholder={t('password.confirm_placeholder')}
           />
         </div>
 
@@ -123,7 +125,7 @@ export default function Password() {
           disabled={loading}
           className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white py-2 rounded-lg transition-colors font-medium"
         >
-          {loading ? '修改中...' : '修改密码'}
+          {loading ? t('password.changing') : t('password.change')}
         </button>
       </form>
     </div>
