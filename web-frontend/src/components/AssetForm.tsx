@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TYPE_LABELS, CURRENCIES } from '../lib/utils';
+import { getTypeLabel, CURRENCIES } from '../lib/utils';
 import { useLang } from '../context/LanguageContext';
 import { translateTagName } from '../lib/translations';
 import type { AssetWithTags, Tag, CreateAsset } from '../types';
@@ -22,6 +22,8 @@ export default function AssetForm({ asset, onClose, onSave, lang = 'zh' }: Props
   const [selectedTags, setSelectedTags] = useState<number[]>([]);
   const [allTags, setAllTags] = useState<Tag[]>([]);
   const [saving, setSaving] = useState(false);
+
+  const l = (zh: string, en: string) => lang === 'en' ? en : zh;
 
   useEffect(() => {
     loadTags();
@@ -54,7 +56,7 @@ export default function AssetForm({ asset, onClose, onSave, lang = 'zh' }: Props
       }
       onSave();
     } catch (e: any) {
-      alert('保存失败: ' + e.message);
+      alert(l('保存失败: ', 'Save failed: ') + e.message);
     } finally {
       setSaving(false);
     }
@@ -68,28 +70,30 @@ export default function AssetForm({ asset, onClose, onSave, lang = 'zh' }: Props
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">{asset ? '编辑资产' : '新建资产'}</h2>
+      <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto mx-4">
+        <h2 className="text-xl font-bold mb-4">{asset ? l('编辑资产', 'Edit Asset') : l('新建资产', 'New Asset')}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">名称 *</label>
+            <label className="block text-sm font-medium mb-1">{l('名称 *', 'Name *')}</label>
             <input type="text" value={name} onChange={e => setName(e.target.value)}
-              className="w-full border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent" required />
+              className="w-full border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent"
+              placeholder={l('如：沪深300ETF', 'e.g. CSI 300 ETF')} required />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">代码</label>
+            <label className="block text-sm font-medium mb-1">{l('代码', 'Symbol')}</label>
             <input type="text" value={symbol} onChange={e => setSymbol(e.target.value)}
-              className="w-full border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent" />
+              className="w-full border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent"
+              placeholder={l('如：IE00BK5BQT80', 'e.g. IE00BK5BQT80')} />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">类型</label>
+            <label className="block text-sm font-medium mb-1">{l('类型', 'Type')}</label>
             <select value={assetType} onChange={e => setAssetType(e.target.value)}
               className="w-full border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent">
-              {ASSET_TYPE_KEYS.map(k => <option key={k} value={k}>{TYPE_LABELS[k] || k}</option>)}
+              {ASSET_TYPE_KEYS.map(k => <option key={k} value={k}>{getTypeLabel(k, lang)}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">货币</label>
+            <label className="block text-sm font-medium mb-1">{l('货币', 'Currency')}</label>
             <select value={currency} onChange={e => setCurrency(e.target.value)}
               className="w-full border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent">
               {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -97,7 +101,7 @@ export default function AssetForm({ asset, onClose, onSave, lang = 'zh' }: Props
           </div>
           {allTags.length > 0 && (
             <div>
-              <label className="block text-sm font-medium mb-1">标签</label>
+              <label className="block text-sm font-medium mb-1">{l('标签', 'Tags')}</label>
               <div className="flex flex-wrap gap-2">
                 {allTags.map(tag => (
                   <button key={tag.id} type="button" onClick={() => toggleTag(tag.id)}
@@ -114,10 +118,10 @@ export default function AssetForm({ asset, onClose, onSave, lang = 'zh' }: Props
           )}
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={onClose}
-              className="flex-1 px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800">取消</button>
+              className="flex-1 px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800">{l('取消', 'Cancel')}</button>
             <button type="submit" disabled={saving}
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
-              {saving ? '保存中...' : '保存'}
+              {saving ? l('保存中...', 'Saving...') : l('保存', 'Save')}
             </button>
           </div>
         </form>
