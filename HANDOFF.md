@@ -1,6 +1,6 @@
 # Investment Tracker Server - Handoff
 
-> 最后更新：2026-08-18（第八次更新 — 修复系统标签 UI、管理员密码安全、前端类型错误）
+> 最后更新：2026-08-18（第九次更新 — 前端移动端适配）
 
 ## 项目概述
 
@@ -221,6 +221,7 @@ npm run build
 - [x] 侧栏「修改密码」和「用户管理」入口
 - [x] AuthContext isAdmin 状态管理
 - [x] 系统标签 UI 保护（隐藏编辑/删除按钮，显示「系统」标识）
+- [x] 移动端适配（响应式侧边栏、汉堡菜单、表格滚动、看板单列）
 
 ## Docker 部署（2026-08-18 更新）
 
@@ -251,14 +252,12 @@ docker run --rm -v investment-tracker-server_investment-data:/data -v $(pwd):/ba
 1. **无分页**：交易列表全量加载，数据量大时可能影响性能
 2. **无汇率**：多货币场景未做汇率转换
 3. **导入覆盖**：导入会覆盖当前用户数据（自动创建备份，保留最近 5 份）
-4. **移动端适配**：侧边栏不可折叠，小屏体验待优化
 
 ## 待办事项
 
 - [ ] 交易列表分页
 - [ ] 多货币汇率转换
 - [ ] 数据导入合并策略
-- [ ] 移动端响应式适配
 - [ ] 单元测试
 - [ ] 可访问性（ARIA、键盘导航）
 
@@ -288,6 +287,8 @@ docker run --rm -v investment-tracker-server_investment-data:/data -v $(pwd):/ba
 ## Git 历史
 
 ```
+b679f62 feat: 前端移动端适配
+6e30499 docs: 更新 README 和 HANDOFF 文档
 2883d06 fix: 隐藏系统标签的编辑/删除按钮，显示「系统」标识
 4151ff3 docs: 更新 README 和 HANDOFF 文档
 576fb8c fix: 修复 listUsers API 类型定义
