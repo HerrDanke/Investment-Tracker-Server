@@ -70,7 +70,7 @@ export const dataApi = {
 
 export const adminApi = {
   me: () => api.get<{ isAdmin: boolean }>('/admin/me').then(r => r.data),
-  listUsers: () => api.get<{ id: string; username: string; created_at: string }[]>('/admin/users').then(r => r.data),
+  listUsers: () => api.get<{ id: string; username: string; created_at: string; isAdmin: boolean }[]>('/admin/users').then(r => r.data),
   deleteUser: (id: string) => api.delete(`/admin/users/${id}`).then(r => r.data),
   getUserData: (id: string) => api.get(`/admin/users/${id}/data`, { responseType: 'text' }).then(r => r.data),
   systemTags: () => api.get<Tag[]>('/admin/system-tags').then(r => r.data),
