@@ -106,7 +106,7 @@ export default function AssetForm({ asset, onClose, onSave, lang = 'zh' }: Props
                         ? 'text-white' : 'bg-transparent text-zinc-700 dark:text-zinc-300'
                     }`}
                     style={selectedTags.includes(tag.id) ? { backgroundColor: tag.color } : {}}>
-                    {tag.category === 'system' ? translateTagName(tag.name, lang) : tag.name}
+                    {tag.category === 'system' ? translateTagName(tag.name, lang as 'zh' | 'en') : tag.name}
                   </button>
                 ))}
               </div>

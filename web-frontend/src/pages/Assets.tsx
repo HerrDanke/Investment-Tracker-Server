@@ -185,7 +185,7 @@ export default function Assets() {
                   {asset.tags.map(tag => (
                     <span key={tag.id} className="px-2 py-0.5 rounded-full text-xs text-white"
                       style={{ backgroundColor: tag.color }}>
-                      {tag.category === 'system' ? translateTagName(tag.name, lang) : tag.name}
+                      {tag.category === 'system' ? translateTagName(tag.name, lang as 'zh' | 'en') : tag.name}
                     </span>
                   ))}
                 </div>
