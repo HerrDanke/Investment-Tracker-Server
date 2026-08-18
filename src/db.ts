@@ -241,13 +241,11 @@ class DatabaseManager {
 
   // ---- Default admin user ----
   // Ensures a default admin account exists on startup.
-  // ADMIN_USERNAME (default: admin) and ADMIN_PASSWORD control the credentials.
+  // ADMIN_USERNAME (default: admin) and ADMIN_PASSWORD (default: admin123) control the credentials.
   // If the admin user already exists, its password is NOT changed.
-  // Without ADMIN_PASSWORD set, no default admin is created (must register normally).
   async ensureAdminUser(): Promise<void> {
     const adminUsername = process.env.ADMIN_USERNAME || 'admin';
-    const adminPassword = process.env.ADMIN_PASSWORD;
-    if (!adminPassword) return; // No password configured — don't create default admin
+    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
 
     const existing = this.users.find((u) => u.username === adminUsername);
     if (existing) return; // Admin already exists — don't overwrite password
