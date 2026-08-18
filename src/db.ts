@@ -327,6 +327,11 @@ class DatabaseManager {
   nextTagId(userId: string): number {
     const db = this.getUserDatabase(userId);
     db._seq.tags += 1;
+    // Ensure custom tag IDs don't collide with system tags (1-9)
+    const maxSystemTagId = this.systemTags.length > 0 ? Math.max(...this.systemTags.map(t => t.id)) : 9;
+    if (db._seq.tags <= maxSystemTagId) {
+      db._seq.tags = maxSystemTagId + 1;
+    }
     return db._seq.tags;
   }
 
@@ -447,9 +452,10 @@ class DatabaseManager {
     // Keep only custom tags in the user's database
     const customTags = legacyDb.tags.filter(t => t.category !== 'system');
 
-    // Remap custom tag IDs to avoid conflicts with system tags
+    // Remap custom tag IDs to avoid conflicts with system tags (start after max system tag ID)
+    const maxSystemTagId = this.systemTags.length > 0 ? Math.max(...this.systemTags.map(t => t.id)) : 9;
     const tagIdMap = new Map<number, number>();
-    let nextCustomId = 1;
+    let nextCustomId = maxSystemTagId + 1;
     for (const tag of customTags) {
       tagIdMap.set(tag.id, nextCustomId);
       tag.id = nextCustomId;
