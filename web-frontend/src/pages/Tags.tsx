@@ -106,12 +106,19 @@ export default function Tags() {
               <div key={tag.id} className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-sm">
                 <span className="w-3 h-3 rounded-full" style={{ backgroundColor: tag.color }}></span>
                 <span className="font-medium">{tag.name}</span>
-                <button onClick={() => openEdit(tag)} className="p-0.5 hover:bg-zinc-100 rounded ml-1">
-                  <Edit2 size={14} className="text-zinc-400" />
-                </button>
-                <button onClick={() => handleDelete(tag.id)} className="p-0.5 hover:bg-zinc-100 rounded">
-                  <Trash2 size={14} className="text-red-400" />
-                </button>
+                {tag.category === 'system' && (
+                  <span className="text-xs text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">系统</span>
+                )}
+                {tag.category !== 'system' && (
+                  <>
+                    <button onClick={() => openEdit(tag)} className="p-0.5 hover:bg-zinc-100 rounded ml-1" title="编辑">
+                      <Edit2 size={14} className="text-zinc-400" />
+                    </button>
+                    <button onClick={() => handleDelete(tag.id)} className="p-0.5 hover:bg-zinc-100 rounded" title="删除">
+                      <Trash2 size={14} className="text-red-400" />
+                    </button>
+                  </>
+                )}
               </div>
             ))}
           </div>
