@@ -47,26 +47,28 @@ export function KanbanCard({
       style={style}
       className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden h-full"
     >
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 shrink-0">
+      <div className="flex items-center px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 shrink-0 select-none">
         <div
-          className="cursor-grab active:cursor-grabbing text-zinc-400 hover:text-zinc-600 touch-none"
+          className="cursor-grab active:cursor-grabbing text-zinc-400 hover:text-zinc-600 touch-none p-2 -ml-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800"
           {...attributes}
           {...listeners}
         >
-          <GripVertical size={16} />
+          <GripVertical size={18} />
         </div>
-        <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1 truncate">{title}</h3>
-        {extraActions}
-        {onToggleCollapse && (
-          <button onClick={onToggleCollapse} className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded text-zinc-400 hover:text-zinc-600">
-            {collapsed ? <Maximize2 size={14} /> : <Minimize2 size={14} />}
-          </button>
-        )}
-        {onDelete && (
-          <button onClick={onDelete} className="p-1 hover:bg-red-50 dark:hover:bg-red-950/30 rounded text-zinc-400 hover:text-red-500">
-            <X size={14} />
-          </button>
-        )}
+        <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1 text-center truncate px-2">{title}</h3>
+        <div className="flex items-center gap-1">
+          {extraActions}
+          {onToggleCollapse && (
+            <button onClick={onToggleCollapse} className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded text-zinc-400 hover:text-zinc-600">
+              {collapsed ? <Maximize2 size={14} /> : <Minimize2 size={14} />}
+            </button>
+          )}
+          {onDelete && (
+            <button onClick={onDelete} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-950/30 rounded text-zinc-400 hover:text-red-500">
+              <X size={14} />
+            </button>
+          )}
+        </div>
       </div>
       {!collapsed && (
         <div className="p-4 flex-1 overflow-auto min-h-0">
