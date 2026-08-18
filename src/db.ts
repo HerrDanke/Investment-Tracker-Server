@@ -1,4 +1,5 @@
 import { promises as fs, readFileSync } from 'fs';
+import argon2 from 'argon2';
 import path from 'path';
 import type { Database, Asset, Transaction, Tag, AssetTag, Sequence, User } from './types';
 
@@ -171,6 +172,9 @@ class DatabaseManager {
       this.systemTags = createDefaultSystemTags();
       await this.persistSystemTags();
     }
+
+    // Ensure default admin user exists
+    await this.ensureAdminUser();
   }
 
   // ---- User database file path ----
@@ -232,6 +236,36 @@ class DatabaseManager {
   private async persistUsers(): Promise<void> {
     const json = JSON.stringify(this.users, null, 2);
     await this.writeAtomically(this.usersPath, json);
+  }
+
+
+  // ---- Default admin user ----
+  // Ensures a default admin account exists on startup.
+  // ADMIN_USERNAME (default: admin) and ADMIN_PASSWORD (default: admin123) control the credentials.
+  // If the admin user already exists, its password is reset to the configured default.
+  async ensureAdminUser(): Promise<void> {
+    const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+
+    const existing = this.users.find((u) => u.username === adminUsername);
+    const passwordHash = await argon2.hash(adminPassword);
+    const now = new Date().toISOString();
+
+    if (existing) {
+      existing.password_hash = passwordHash;
+      await this.persistUsers();
+      console.log(`Admin user "${adminUsername}" password reset to configured default`);
+    } else {
+      const adminUser: User = {
+        id: crypto.randomUUID(),
+        username: adminUsername,
+        password_hash: passwordHash,
+        created_at: now,
+      };
+      this.users.push(adminUser);
+      await this.persistUsers();
+      console.log(`Created default admin user "${adminUsername}"`);
+    }
   }
 
   // ---- System tags management ----
