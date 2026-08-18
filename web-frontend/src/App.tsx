@@ -8,6 +8,7 @@ import Assets from './pages/Assets';
 import Transactions from './pages/Transactions';
 import Tags from './pages/Tags';
 import Users from './pages/Users';
+import Password from './pages/Password';
 import Login from './pages/Login';
 import { DataModal } from './components/DataModal';
 
@@ -38,6 +39,7 @@ function ProtectedRoutes() {
           <Route path="assets" element={<Assets key={refreshKey} />} />
           <Route path="transactions" element={<Transactions key={refreshKey} />} />
           <Route path="tags" element={<Tags key={refreshKey} />} />
+          <Route path="password" element={<Password key={refreshKey} />} />
           <Route path="users" element={isAdmin ? <Users key={refreshKey} /> : <Navigate to="/" replace />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

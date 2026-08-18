@@ -56,6 +56,48 @@ export default async function authRoutes(app: FastifyInstance) {
     }
   );
 
+  // POST /api/auth/change-password - Change own password (any authenticated user)
+  app.post<{ Body: { old_password: string; new_password: string; new_password_confirm: string }; Reply: { success: boolean } | { error: string } }>(
+    '/auth/change-password',
+    { onRequest: [app.authenticate] },
+    async (request, reply) => {
+      const userId = request.user!.sub;
+      const { old_password, new_password, new_password_confirm } = request.body;
+
+      // Validation
+      if (!old_password || !new_password || !new_password_confirm) {
+        return reply.code(400).send({ error: '所有字段不能为空' });
+      }
+      if (new_password.length < 6) {
+        return reply.code(400).send({ error: '新密码至少6个字符' });
+      }
+      if (new_password !== new_password_confirm) {
+        return reply.code(400).send({ error: '两次新密码输入不一致' });
+      }
+      if (old_password === new_password) {
+        return reply.code(400).send({ error: '新密码不能与旧密码相同' });
+      }
+
+      const users = db.getUsers();
+      const user = users.find((u) => u.id === userId);
+      if (!user) {
+        return reply.code(404).send({ error: '用户不存在' });
+      }
+
+      // Verify old password
+      const isValid = await argon2.verify(user.password_hash, old_password);
+      if (!isValid) {
+        return reply.code(400).send({ error: '旧密码错误' });
+      }
+
+      // Update password
+      user.password_hash = await argon2.hash(new_password);
+      await db.updateUsers(users);
+
+      return reply.send({ success: true });
+    }
+  );
+
   // POST /api/auth/login
   app.post<{ Body: LoginRequest; Reply: AuthResponse | { error: string } }>(
     '/auth/login',

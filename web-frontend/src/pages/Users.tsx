@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Trash2, Download, Shield, Users as UsersIcon } from 'lucide-react';
-import { adminApi } from '../lib/api';
+import { Trash2, Download, Shield, Users as UsersIcon, KeyRound } from 'lucide-react';
+import { adminApi, passwordApi } from '../lib/api';
 
 interface UserInfo {
   id: string;
@@ -13,6 +13,44 @@ export default function Users() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actionId, setActionId] = useState<string | null>(null);
+
+  // Password change state
+  const [pwOld, setPwOld] = useState('');
+  const [pwNew, setPwNew] = useState('');
+  const [pwConfirm, setPwConfirm] = useState('');
+  const [pwMsg, setPwMsg] = useState('');
+  const [pwError, setPwError] = useState('');
+  const [pwLoading, setPwLoading] = useState(false);
+
+  async function handleChangePassword(e: React.FormEvent) {
+    e.preventDefault();
+    setPwMsg('');
+    setPwError('');
+    if (!pwOld || !pwNew || !pwConfirm) {
+      setPwError('所有字段不能为空');
+      return;
+    }
+    if (pwNew.length < 6) {
+      setPwError('新密码至少6个字符');
+      return;
+    }
+    if (pwNew !== pwConfirm) {
+      setPwError('两次新密码输入不一致');
+      return;
+    }
+    try {
+      setPwLoading(true);
+      await passwordApi.changePassword({ old_password: pwOld, new_password: pwNew, new_password_confirm: pwConfirm });
+      setPwMsg('密码修改成功');
+      setPwOld('');
+      setPwNew('');
+      setPwConfirm('');
+    } catch (err: any) {
+      setPwError(err.response?.data?.error || '密码修改失败');
+    } finally {
+      setPwLoading(false);
+    }
+  }
 
   const loadUsers = useCallback(async () => {
     try {
@@ -73,6 +111,55 @@ export default function Users() {
       <div className="flex items-center gap-3">
         <Shield className="text-blue-600" size={24} />
         <h1 className="text-2xl font-bold">用户管理</h1>
+      </div>
+
+      {/* Password change section for admin */}
+      <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <KeyRound size={20} className="text-blue-600" />
+          <h2 className="text-lg font-semibold">修改密码</h2>
+        </div>
+        <form onSubmit={handleChangePassword} className="flex flex-wrap gap-3 items-end">
+          <div className="flex-1 min-w-[150px]">
+            <label className="block text-xs text-zinc-500 mb-1">旧密码</label>
+            <input
+              type="password"
+              value={pwOld}
+              onChange={(e) => setPwOld(e.target.value)}
+              className="w-full px-3 py-1.5 text-sm border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-blue-500"
+              placeholder="当前密码"
+            />
+          </div>
+          <div className="flex-1 min-w-[150px]">
+            <label className="block text-xs text-zinc-500 mb-1">新密码</label>
+            <input
+              type="password"
+              value={pwNew}
+              onChange={(e) => setPwNew(e.target.value)}
+              className="w-full px-3 py-1.5 text-sm border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-blue-500"
+              placeholder="至少6个字符"
+            />
+          </div>
+          <div className="flex-1 min-w-[150px]">
+            <label className="block text-xs text-zinc-500 mb-1">确认新密码</label>
+            <input
+              type="password"
+              value={pwConfirm}
+              onChange={(e) => setPwConfirm(e.target.value)}
+              className="w-full px-3 py-1.5 text-sm border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-blue-500"
+              placeholder="再次输入"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={pwLoading}
+            className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm rounded-lg transition-colors"
+          >
+            {pwLoading ? '修改中...' : '修改'}
+          </button>
+          {pwMsg && <span className="text-sm text-green-600 w-full">{pwMsg}</span>}
+          {pwError && <span className="text-sm text-red-500 w-full">{pwError}</span>}
+        </form>
       </div>
 
       {users.length === 0 ? (

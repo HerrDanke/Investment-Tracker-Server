@@ -79,4 +79,9 @@ export const adminApi = {
   deleteSystemTag: (id: number) => api.delete(`/admin/system-tags/${id}`).then(r => r.data),
 }
 
+export const passwordApi = {
+  changePassword: (data: { old_password: string; new_password: string; new_password_confirm: string }) =>
+    api.post('/auth/change-password', data).then(r => r.data),
+}
+
 export default api

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, PiggyBank, ArrowLeftRight, Tags, Database, Moon, Sun, LogOut, User, Shield } from 'lucide-react';
+import { LayoutDashboard, PiggyBank, ArrowLeftRight, Tags, Database, Moon, Sun, LogOut, User, Shield, KeyRound } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const navItems = [
@@ -57,6 +57,17 @@ export default function Sidebar({ onDataClick }: Props) {
           <Database size={20} />
           <span>数据管理</span>
         </button>
+        <NavLink
+          to="/password"
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+              isActive ? 'bg-blue-600 text-white' : 'text-zinc-300 hover:bg-zinc-800'
+            }`
+          }
+        >
+          <KeyRound size={20} />
+          <span>修改密码</span>
+        </NavLink>
         <button
           onClick={() => setDark(!dark)}
           className="flex items-center gap-3 px-3 py-2 rounded-lg text-zinc-300 hover:bg-zinc-800 w-full text-left transition-colors"
