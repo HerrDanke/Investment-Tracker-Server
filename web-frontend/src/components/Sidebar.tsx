@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, PiggyBank, ArrowLeftRight, Tags, Database, Moon, Sun, LogOut, User } from 'lucide-react';
+import { LayoutDashboard, PiggyBank, ArrowLeftRight, Tags, Database, Moon, Sun, LogOut, User, Shield } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const navItems = [
@@ -8,6 +8,7 @@ const navItems = [
   { to: '/assets', icon: PiggyBank, label: '资产' },
   { to: '/transactions', icon: ArrowLeftRight, label: '交易' },
   { to: '/tags', icon: Tags, label: '标签' },
+  { to: '/users', icon: Shield, label: '用户管理', adminOnly: true },
 ];
 
 interface Props {
@@ -15,7 +16,7 @@ interface Props {
 }
 
 export default function Sidebar({ onDataClick }: Props) {
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const [dark, setDark] = useState(() => {
     try {
       return localStorage.getItem('theme') === 'dark';
@@ -33,7 +34,7 @@ export default function Sidebar({ onDataClick }: Props) {
     <aside className="w-64 bg-zinc-900 dark:bg-zinc-950 text-white h-screen p-4 flex flex-col fixed left-0 top-0 overflow-y-auto">
       <h1 className="text-xl font-bold mb-8 px-2">投资追踪</h1>
       <nav className="space-y-1 flex-1">
-        {navItems.map(({ to, icon: Icon, label }) => (
+        {navItems.filter(item => !item.adminOnly || isAdmin).map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}

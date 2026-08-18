@@ -12,6 +12,12 @@ export default async function adminRoutes(app: FastifyInstance) {
     }
   }
 
+  // GET /api/admin/me - Check if current user is admin
+  app.get('/me', { onRequest: [app.authenticate] }, async (request, reply) => {
+    const userId = request.user!.sub;
+    return reply.send({ isAdmin: db.isAdmin(userId) });
+  });
+
   // GET /api/admin/users - List all users
   app.get('/users', { onRequest: [app.authenticate, requireAdmin] }, async (request, reply) => {
     return reply.send(db.listUsers());

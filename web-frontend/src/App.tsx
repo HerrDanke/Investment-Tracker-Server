@@ -7,11 +7,12 @@ import Dashboard from './pages/Dashboard';
 import Assets from './pages/Assets';
 import Transactions from './pages/Transactions';
 import Tags from './pages/Tags';
+import Users from './pages/Users';
 import Login from './pages/Login';
 import { DataModal } from './components/DataModal';
 
 function ProtectedRoutes() {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
   const [refreshKey, setRefreshKey] = useState(0);
   const [showDataModal, setShowDataModal] = useState(false);
 
@@ -37,6 +38,7 @@ function ProtectedRoutes() {
           <Route path="assets" element={<Assets key={refreshKey} />} />
           <Route path="transactions" element={<Transactions key={refreshKey} />} />
           <Route path="tags" element={<Tags key={refreshKey} />} />
+          <Route path="users" element={isAdmin ? <Users key={refreshKey} /> : <Navigate to="/" replace />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
         <Route path="/login" element={<Navigate to="/" replace />} />
@@ -56,7 +58,7 @@ function AppRoutes() {
 }
 
 function PublicLogin() {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">

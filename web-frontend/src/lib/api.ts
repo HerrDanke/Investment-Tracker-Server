@@ -68,4 +68,15 @@ export const dataApi = {
   import: (data: unknown) => api.post('/import', data).then(r => r.data),
 }
 
+export const adminApi = {
+  me: () => api.get<{ isAdmin: boolean }>('/admin/me').then(r => r.data),
+  listUsers: () => api.get<{ id: string; username: string; created_at: string }[]>('/admin/users').then(r => r.data),
+  deleteUser: (id: string) => api.delete(`/admin/users/${id}`).then(r => r.data),
+  getUserData: (id: string) => api.get(`/admin/users/${id}/data`, { responseType: 'text' }).then(r => r.data),
+  systemTags: () => api.get<Tag[]>('/admin/system-tags').then(r => r.data),
+  createSystemTag: (data: { name: string; color?: string }) => api.post('/admin/system-tags', data).then(r => r.data),
+  updateSystemTag: (id: number, data: { name?: string; color?: string }) => api.patch(`/admin/system-tags/${id}`, data).then(r => r.data),
+  deleteSystemTag: (id: number) => api.delete(`/admin/system-tags/${id}`).then(r => r.data),
+}
+
 export default api

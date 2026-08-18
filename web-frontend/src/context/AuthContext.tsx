@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useMemo, type ReactNode } from 'react';
 import axios from 'axios';
+import { adminApi } from '../lib/api';
 
 interface UserInfo {
   id: string;
@@ -13,6 +14,7 @@ interface AuthContextType {
   login: (username: string, password: string) => Promise<void>;
   register: (username: string, password: string, passwordConfirm: string) => Promise<void>;
   logout: () => void;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -23,6 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserInfo | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
@@ -36,6 +39,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem('user');
       }
     }
+    // Check admin status when token exists
+    if (storedToken) {
+      adminApi.me().then(res => setIsAdmin(res.isAdmin)).catch(() => setIsAdmin(false));
+    }
     setLoading(false);
   }, []);
 
@@ -46,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
+    adminApi.me().then(res => setIsAdmin(res.isAdmin)).catch(() => setIsAdmin(false));
   }
 
   async function register(username: string, password: string, passwordConfirm: string) {
@@ -59,6 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
+    adminApi.me().then(res => setIsAdmin(res.isAdmin)).catch(() => setIsAdmin(false));
   }
 
   function logout() {
@@ -66,9 +75,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('user');
     setToken(null);
     setUser(null);
+    setIsAdmin(false);
   }
 
-  const value = useMemo(() => ({ user, token, loading, login, register, logout }), [user, token, loading]);
+  const value = useMemo(() => ({ user, token, loading, login, register, logout, isAdmin }), [user, token, loading]);
 
   return (
     <AuthContext.Provider value={value}>
