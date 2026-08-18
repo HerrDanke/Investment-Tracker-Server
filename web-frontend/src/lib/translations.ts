@@ -360,3 +360,20 @@ export const translations: Record<Lang, Record<string, string>> = {
 export function t(key: string, lang: Lang): string {
   return translations[lang][key] || key;
 }
+
+// System tag name translations (stored as data in DB)
+const SYSTEM_TAG_NAMES: Record<string, Record<Lang, string>> = {
+  'A股': { zh: 'A股', en: 'A-Shares' },
+  '宽基指数': { zh: '宽基指数', en: 'Broad Index' },
+  '港股': { zh: '港股', en: 'HK Stocks' },
+  '基金': { zh: '基金', en: 'Fund' },
+  '美股': { zh: '美股', en: 'US Stocks' },
+  '债券': { zh: '债券', en: 'Bond' },
+  '加密货币': { zh: '加密货币', en: 'Crypto' },
+  'ETF': { zh: 'ETF', en: 'ETF' },
+  '股票': { zh: '股票', en: 'Stock' },
+};
+
+export function translateTagName(name: string, lang: Lang): string {
+  return SYSTEM_TAG_NAMES[name]?.[lang] || name;
+}

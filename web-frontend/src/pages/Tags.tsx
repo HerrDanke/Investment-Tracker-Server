@@ -3,10 +3,11 @@ import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { tagApi } from '../lib/api';
 import { PRESET_COLORS } from '../lib/utils';
 import { useLang } from '../context/LanguageContext';
+import { translateTagName } from '../lib/translations';
 import type { Tag, CreateTag } from '../types';
 
 export default function Tags() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -109,7 +110,7 @@ export default function Tags() {
             {categoryTags.map(tag => (
               <div key={tag.id} className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-sm">
                 <span className="w-3 h-3 rounded-full" style={{ backgroundColor: tag.color }}></span>
-                <span className="font-medium">{tag.name}</span>
+                <span className="font-medium">{tag.category === 'system' ? translateTagName(tag.name, lang) : tag.name}</span>
                 {tag.category === 'system' && (
                   <span className="text-xs text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">{t('common.system')}</span>
                 )}

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { TYPE_LABELS, CURRENCIES } from '../lib/utils';
+import { useLang } from '../context/LanguageContext';
+import { translateTagName } from '../lib/translations';
 import type { AssetWithTags, Tag, CreateAsset } from '../types';
 import { assetApi, tagApi } from '../lib/api';
 
@@ -7,11 +9,12 @@ interface Props {
   asset?: AssetWithTags;
   onClose: () => void;
   onSave: () => void;
+  lang?: string;
 }
 
 const ASSET_TYPE_KEYS = ['stock', 'etf', 'fund', 'bond', 'crypto', 'other'];
 
-export default function AssetForm({ asset, onClose, onSave }: Props) {
+export default function AssetForm({ asset, onClose, onSave, lang = 'zh' }: Props) {
   const [name, setName] = useState('');
   const [symbol, setSymbol] = useState('');
   const [assetType, setAssetType] = useState('stock');
@@ -103,7 +106,7 @@ export default function AssetForm({ asset, onClose, onSave }: Props) {
                         ? 'text-white' : 'bg-transparent text-zinc-700 dark:text-zinc-300'
                     }`}
                     style={selectedTags.includes(tag.id) ? { backgroundColor: tag.color } : {}}>
-                    {tag.name}
+                    {tag.category === 'system' ? translateTagName(tag.name, lang) : tag.name}
                   </button>
                 ))}
               </div>

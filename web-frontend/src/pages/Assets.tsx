@@ -3,6 +3,7 @@ import { Plus, Edit2, Trash2, Filter, X } from 'lucide-react';
 import { assetApi, tagApi } from '../lib/api';
 import { getTypeLabel } from '../lib/utils';
 import { useLang } from '../context/LanguageContext';
+import { translateTagName } from '../lib/translations';
 import type { AssetWithTags, Tag } from '../types';
 import AssetForm from '../components/AssetForm';
 
@@ -184,7 +185,7 @@ export default function Assets() {
                   {asset.tags.map(tag => (
                     <span key={tag.id} className="px-2 py-0.5 rounded-full text-xs text-white"
                       style={{ backgroundColor: tag.color }}>
-                      {tag.name}
+                      {tag.category === 'system' ? translateTagName(tag.name, lang) : tag.name}
                     </span>
                   ))}
                 </div>
@@ -198,7 +199,7 @@ export default function Assets() {
         <AssetForm asset={editingAsset} onClose={() => setShowForm(false)} onSave={() => {
           setShowForm(false);
           loadAssets();
-        }} />
+        }} lang={lang} />
       )}
     </div>
   );
