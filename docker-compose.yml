@@ -13,6 +13,8 @@ services:
       - PORT=8080
       - DATA_DIR=/app/data
       - JWT_SECRET=${JWT_SECRET:-please-change-this-secret}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/health"]
