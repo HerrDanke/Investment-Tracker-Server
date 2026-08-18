@@ -1,4 +1,4 @@
-import { promises as fs } from 'fs';
+import { promises as fs, readFileSync } from 'fs';
 import path from 'path';
 import type { Database, Asset, Transaction, Tag, AssetTag, Sequence, User } from './types';
 
@@ -16,7 +16,7 @@ function createDefaultDatabase(): Database {
 // Parse database from JSON string with field alias support
 function parseDatabase(json: string): Database {
   const raw = JSON.parse(json);
-  
+
   // Normalize assets - handle both camelCase and snake_case from data.json
   const assets: Asset[] = (raw.assets || []).map((a: any) => ({
     id: a.id,
@@ -104,34 +104,39 @@ export function serializeDatabase(db: Database): string {
   return JSON.stringify(output, null, 2);
 }
 
-// Database class with file-based persistence
+// Default system tags (shared across all users)
+function createDefaultSystemTags(): Tag[] {
+  return [
+    { id: 1, name: 'A股', category: 'system', color: '#EF4444' },
+    { id: 2, name: '宽基指数', category: 'system', color: '#8B5CF6' },
+    { id: 3, name: '港股', category: 'system', color: '#F59E0B' },
+    { id: 4, name: '基金', category: 'system', color: '#3B82F6' },
+    { id: 5, name: '美股', category: 'system', color: '#10B981' },
+    { id: 6, name: '债券', category: 'system', color: '#6366F1' },
+    { id: 7, name: '加密货币', category: 'system', color: '#F97316' },
+    { id: 8, name: 'ETF', category: 'system', color: '#14B8A6' },
+    { id: 9, name: '股票', category: 'system', color: '#EC4899' },
+  ];
+}
+
+// Database class with per-user file-based persistence
 class DatabaseManager {
-  private db: Database;
   private users: User[] = [];
-  private dataPath: string;
+  private userDbs = new Map<string, Database>();
+  private systemTags: Tag[] = [];
+  private dataDir: string;
   private usersPath: string;
+  private systemTagsPath: string;
   private writeQueue: Promise<void> = Promise.resolve();
 
   constructor(dataDir: string) {
-    this.dataPath = path.join(dataDir, 'data.json');
+    this.dataDir = dataDir;
     this.usersPath = path.join(dataDir, 'users.json');
-    this.db = createDefaultDatabase();
+    this.systemTagsPath = path.join(dataDir, 'system-tags.json');
   }
 
   async init(): Promise<void> {
-    // Load database
-    try {
-      const content = await fs.readFile(this.dataPath, 'utf-8');
-      if (content.trim()) {
-        this.db = parseDatabase(content);
-      }
-    } catch (err: any) {
-      if (err.code !== 'ENOENT') {
-        console.error('Failed to load data.json:', err);
-      }
-      // Create default database file
-      await this.persist();
-    }
+    await fs.mkdir(this.dataDir, { recursive: true });
 
     // Load users
     try {
@@ -145,79 +150,236 @@ class DatabaseManager {
       }
       await this.persistUsers();
     }
+
+    // Load system tags
+    try {
+      const content = await fs.readFile(this.systemTagsPath, 'utf-8');
+      if (content.trim()) {
+        this.systemTags = JSON.parse(content);
+      }
+    } catch (err: any) {
+      if (err.code !== 'ENOENT') {
+        console.error('Failed to load system-tags.json:', err);
+      }
+    }
+
+    // Migrate legacy shared data file
+    await this.migrateLegacyData();
+
+    // Ensure system tags exist
+    if (this.systemTags.length === 0) {
+      this.systemTags = createDefaultSystemTags();
+      await this.persistSystemTags();
+    }
   }
 
-  // Get database (for read operations)
-  getDatabase(): Database {
-    return this.db;
+  // ---- User database file path ----
+  private userDbPath(userId: string): string {
+    return path.join(this.dataDir, `data-${userId}.json`);
   }
 
-  // Get users
+  // ---- Get user-specific database (lazy load, returns cached reference) ----
+  getUserDatabase(userId: string): Database {
+    const cached = this.userDbs.get(userId);
+    if (cached) return cached;
+    const db = this.loadUserDatabase(userId);
+    this.userDbs.set(userId, db);
+    return db;
+  }
+
+  private loadUserDatabase(userId: string): Database {
+    try {
+      const content = readFileSync(this.userDbPath(userId), 'utf-8');
+      if (content.trim()) {
+        return parseDatabase(content);
+      }
+    } catch (err: any) {
+      if (err.code !== 'ENOENT') {
+        console.error(`Failed to load data for user ${userId}:`, err);
+      }
+    }
+    return createDefaultDatabase();
+  }
+
+  // ---- Persist user database ----
+  async persistUserDatabase(userId: string): Promise<void> {
+    const db = this.userDbs.get(userId);
+    if (!db) throw new Error(`No database cached for user ${userId}`);
+    const json = serializeDatabase(db);
+    await this.writeAtomically(this.userDbPath(userId), json);
+  }
+
+  // ---- Atomic write (shared write queue for serialization) ----
+  private async writeAtomically(filePath: string, content: string): Promise<void> {
+    this.writeQueue = this.writeQueue.then(async () => {
+      const tmpPath = filePath + '.tmp';
+      await fs.writeFile(tmpPath, content, 'utf-8');
+      await fs.rename(tmpPath, filePath);
+    });
+    return this.writeQueue;
+  }
+
+  // ---- Users management ----
   getUsers(): User[] {
     return this.users;
   }
 
-  // Update database and persist
-  async updateDatabase(newDb: Database): Promise<void> {
-    this.db = newDb;
-    await this.persist();
-  }
-
-  // Update users and persist
   async updateUsers(newUsers: User[]): Promise<void> {
     this.users = newUsers;
     await this.persistUsers();
   }
 
-  // Persist database to file (atomic write via temp file)
-  private async persist(): Promise<void> {
-    const json = serializeDatabase(this.db);
-    // Queue writes to prevent race conditions
-    this.writeQueue = this.writeQueue.then(async () => {
-      try {
-        const tmpPath = this.dataPath + '.tmp';
-        await fs.writeFile(tmpPath, json, 'utf-8');
-        await fs.rename(tmpPath, this.dataPath);
-      } catch (err: any) {
-        console.error('Failed to persist database:', err);
-        throw new Error('数据保存失败: ' + (err.message || '未知错误'));
-      }
-    });
-    return this.writeQueue;
-  }
-
-  // Persist users to file
   private async persistUsers(): Promise<void> {
     const json = JSON.stringify(this.users, null, 2);
-    this.writeQueue = this.writeQueue.then(async () => {
-      try {
-        const tmpPath = this.usersPath + '.tmp';
-        await fs.writeFile(tmpPath, json, 'utf-8');
-        await fs.rename(tmpPath, this.usersPath);
-      } catch (err: any) {
-        console.error('Failed to persist users:', err);
-        throw new Error('用户数据保存失败: ' + (err.message || '未知错误'));
+    await this.writeAtomically(this.usersPath, json);
+  }
+
+  // ---- System tags management ----
+  getSystemTags(): Tag[] {
+    return this.systemTags;
+  }
+
+  // Get all tags visible to a user (system + custom)
+  getAllTagsForUser(userId: string): Tag[] {
+    const userDb = this.getUserDatabase(userId);
+    return [...this.systemTags, ...userDb.tags];
+  }
+
+  // Find a tag by ID across system and user tags
+  findTagById(userId: string, tagId: number): { tag: Tag; isSystem: boolean } | null {
+    const systemTag = this.systemTags.find(t => t.id === tagId);
+    if (systemTag) return { tag: systemTag, isSystem: true };
+    const userDb = this.getUserDatabase(userId);
+    const customTag = userDb.tags.find(t => t.id === tagId);
+    if (customTag) return { tag: customTag, isSystem: false };
+    return null;
+  }
+
+  async createSystemTag(tag: Tag): Promise<void> {
+    this.systemTags.push(tag);
+    await this.persistSystemTags();
+  }
+
+  async updateSystemTag(tagId: number, updates: Partial<Pick<Tag, 'name' | 'color'>>): Promise<boolean> {
+    const tag = this.systemTags.find(t => t.id === tagId);
+    if (!tag) return false;
+    if (updates.name !== undefined) tag.name = updates.name;
+    if (updates.color !== undefined) tag.color = updates.color;
+    await this.persistSystemTags();
+    return true;
+  }
+
+  async deleteSystemTag(tagId: number): Promise<boolean> {
+    const before = this.systemTags.length;
+    this.systemTags = this.systemTags.filter(t => t.id !== tagId);
+    if (this.systemTags.length === before) return false;
+    await this.persistSystemTags();
+    return true;
+  }
+
+  private async persistSystemTags(): Promise<void> {
+    const json = JSON.stringify(this.systemTags, null, 2);
+    await this.writeAtomically(this.systemTagsPath, json);
+  }
+
+  // ---- ID generation (per-user scope) ----
+  nextAssetId(userId: string): number {
+    const db = this.getUserDatabase(userId);
+    db._seq.assets += 1;
+    return db._seq.assets;
+  }
+
+  nextTransactionId(userId: string): number {
+    const db = this.getUserDatabase(userId);
+    db._seq.transactions += 1;
+    return db._seq.transactions;
+  }
+
+  nextTagId(userId: string): number {
+    const db = this.getUserDatabase(userId);
+    db._seq.tags += 1;
+    return db._seq.tags;
+  }
+
+  // ---- Data directory accessor ----
+  getDataDir(): string {
+    return this.dataDir;
+  }
+
+  // ---- Legacy data migration ----
+  private async migrateLegacyData(): Promise<void> {
+    // No users or no legacy file → nothing to migrate
+    if (this.users.length === 0) return;
+
+    const legacyPath = path.join(this.dataDir, 'data.json');
+    let content: string;
+    try {
+      content = await fs.readFile(legacyPath, 'utf-8');
+    } catch (err: any) {
+      if (err.code !== 'ENOENT') {
+        console.error('Failed to read legacy data.json:', err);
       }
-    });
-    return this.writeQueue;
-  }
+      return; // No legacy file, nothing to migrate
+    }
 
-  // Generate next asset ID
-  nextAssetId(): number {
-    this.db._seq.assets += 1;
-    return this.db._seq.assets;
-  }
+    const adminUser = this.users[0];
+    const targetPath = this.userDbPath(adminUser.id);
 
-  // Generate next transaction ID
-  nextTransactionId(): number {
-    this.db._seq.transactions += 1;
-    return this.db._seq.transactions;
-  }
+    // If admin already has a data file, just archive the legacy file
+    try {
+      await fs.access(targetPath);
+      await fs.rename(legacyPath, `${legacyPath}.archived-${Date.now()}`);
+      console.log(`Per-user data exists for ${adminUser.username}; archived legacy data.json`);
+      return;
+    } catch {
+      // Target file doesn't exist, safe to migrate
+    }
 
-  // Generate next tag ID
-  nextTagId(): number {
-    this.db._seq.tags += 1;
-    return this.db._seq.tags;
+    // Parse legacy data and separate system tags from custom tags
+    const legacyDb = content.trim() ? parseDatabase(content) : createDefaultDatabase();
+
+    // Extract system tags to system-tags.json if not already present
+    const systemTagsFromLegacy = legacyDb.tags.filter(t => t.category === 'system');
+    if (systemTagsFromLegacy.length > 0 && this.systemTags.length === 0) {
+      this.systemTags = systemTagsFromLegacy;
+      await this.persistSystemTags();
+    }
+
+    // Keep only custom tags in the user's database
+    const customTags = legacyDb.tags.filter(t => t.category !== 'system');
+
+    // Remap custom tag IDs to avoid conflicts with system tags
+    const tagIdMap = new Map<number, number>();
+    let nextCustomId = 1;
+    for (const tag of customTags) {
+      tagIdMap.set(tag.id, nextCustomId);
+      tag.id = nextCustomId;
+      nextCustomId++;
+    }
+
+    // Update asset_tags references for custom tags
+    const migratedDb: Database = {
+      assets: legacyDb.assets,
+      transactions: legacyDb.transactions,
+      tags: customTags,
+      asset_tags: legacyDb.asset_tags.map(at => ({
+        asset_id: at.asset_id,
+        tag_id: tagIdMap.get(at.tag_id) ?? at.tag_id, // system tag IDs stay the same
+      })),
+      _seq: {
+        assets: legacyDb._seq.assets,
+        transactions: legacyDb._seq.transactions,
+        tags: customTags.length > 0 ? Math.max(...customTags.map(t => t.id)) : 0,
+      },
+    };
+
+    // Cache and persist admin's data
+    this.userDbs.set(adminUser.id, migratedDb);
+    await this.persistUserDatabase(adminUser.id);
+
+    // Archive legacy file
+    await fs.rename(legacyPath, `${legacyPath}.migrated-${Date.now()}`);
+    console.log(`Migrated legacy data.json to user ${adminUser.username} (${adminUser.id})`);
   }
 }
 

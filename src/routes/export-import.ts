@@ -9,10 +9,21 @@ const MAX_IMPORT_SIZE = 10 * 1024 * 1024; // 10MB
 export default async function exportImportRoutes(app: FastifyInstance) {
   const db = app.db;
 
-  // GET /api/export - Export all data
+  // GET /api/export - Export current user's data
   app.get('/export', { onRequest: [app.authenticate] }, async (request, reply) => {
-    const database = db.getDatabase();
-    // Output in snake_case format (matches frontend expectations)
+    const userId = request.user!.sub;
+    const database = db.getUserDatabase(userId);
+    // Include system tags that are referenced by this user's assets
+    // so the export file is self-contained and Tauri-compatible
+    const referencedSystemTagIds = new Set(
+      database.asset_tags
+        .map(at => db.findTagById(userId, at.tag_id))
+        .filter(t => t?.isSystem)
+        .map(t => t!.tag.id)
+    );
+    const referencedSystemTags = db.getSystemTags().filter(t => referencedSystemTagIds.has(t.id));
+
+    // Output in snake_case format (matches Tauri desktop expectations)
     const output = {
       assets: database.assets.map(a => ({
         id: a.id,
@@ -37,7 +48,7 @@ export default async function exportImportRoutes(app: FastifyInstance) {
         created_at: t.created_at,
         updated_at: t.updated_at,
       })),
-      tags: database.tags,
+      tags: [...referencedSystemTags, ...database.tags], // System tags (referenced) + custom tags
       asset_tags: database.asset_tags.map(at => ({
         asset_id: at.asset_id,
         tag_id: at.tag_id,
@@ -51,11 +62,12 @@ export default async function exportImportRoutes(app: FastifyInstance) {
       .send(json);
   });
 
-  // POST /api/import - Import data (overwrite mode)
+  // POST /api/import - Import data (overwrite current user's data)
   app.post<{ Body: string; Reply: { success: boolean } | { error: string } }>(
     '/import',
     { onRequest: [app.authenticate] },
     async (request, reply) => {
+      const userId = request.user!.sub;
       const body = typeof request.body === 'string' ? request.body : JSON.stringify(request.body);
 
       // Check size limit
@@ -110,7 +122,8 @@ export default async function exportImportRoutes(app: FastifyInstance) {
           created_at: t.created_at ?? t.createdAt ?? new Date().toISOString(),
           updated_at: t.updated_at ?? t.updatedAt ?? new Date().toISOString(),
         })),
-        tags: imported.tags,
+        // Filter out system tags from import — they are managed globally
+        tags: imported.tags.filter((t: any) => t.category !== 'system'),
         asset_tags: (imported.asset_tags ?? (imported as any).assetTags ?? []).map((at: any) => ({
           asset_id: at.asset_id ?? at.assetId ?? 0,
           tag_id: at.tag_id ?? at.tagId ?? 0,
@@ -118,15 +131,15 @@ export default async function exportImportRoutes(app: FastifyInstance) {
         _seq: imported._seq ?? { assets: 0, transactions: 0, tags: 0 },
       };
 
-      // Create backup before overwriting
+      // Create per-user backup before overwriting
       try {
-        const dataDir = path.dirname((db as any).dataPath);
-        const backupPath = path.join(dataDir, `data-backup-${Date.now()}.json`);
-        const currentData = serializeDatabase(db.getDatabase());
+        const dataDir = db.getDataDir();
+        const backupPath = path.join(dataDir, `data-${userId}-backup-${Date.now()}.json`);
+        const currentData = serializeDatabase(db.getUserDatabase(userId));
         await fs.writeFile(backupPath, currentData, 'utf-8');
-        // Keep only last 5 backups
+        // Keep only last 5 backups per user
         const files = await fs.readdir(dataDir);
-        const backups = files.filter(f => f.startsWith('data-backup-')).sort();
+        const backups = files.filter(f => f.startsWith(`data-${userId}-backup-`)).sort();
         while (backups.length > 5) {
           const oldest = backups.shift();
           if (oldest) await fs.unlink(path.join(dataDir, oldest));
@@ -135,7 +148,15 @@ export default async function exportImportRoutes(app: FastifyInstance) {
         console.warn('Failed to create backup before import:', backupErr.message);
       }
 
-      await db.updateDatabase(normalizedDb);
+      // Replace current user's data
+      const userDb = db.getUserDatabase(userId);
+      userDb.assets = normalizedDb.assets;
+      userDb.transactions = normalizedDb.transactions;
+      userDb.tags = normalizedDb.tags;
+      userDb.asset_tags = normalizedDb.asset_tags;
+      userDb._seq = normalizedDb._seq;
+      await db.persistUserDatabase(userId);
+
       return reply.send({ success: true });
     }
   );

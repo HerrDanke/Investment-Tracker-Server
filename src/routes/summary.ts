@@ -6,7 +6,8 @@ export default async function summaryRoutes(app: FastifyInstance) {
 
   // GET /api/summary - Investment summary
   app.get<{ Reply: Summary }>('/summary', { onRequest: [app.authenticate] }, async (request, reply) => {
-    const database = db.getDatabase();
+    const userId = request.user!.sub;
+    const database = db.getUserDatabase(userId);
     let totalInvestment = 0;
     let totalFees = 0;
     let totalTax = 0;
@@ -42,7 +43,7 @@ export default async function summaryRoutes(app: FastifyInstance) {
 
       const tags: Tag[] = database.asset_tags
         .filter((at) => at.asset_id === asset.id)
-        .map((at) => database.tags.find((t) => t.id === at.tag_id))
+        .map((at) => db.findTagById(userId, at.tag_id)?.tag)
         .filter((t): t is Tag => t !== undefined);
 
       return {

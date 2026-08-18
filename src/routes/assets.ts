@@ -4,14 +4,26 @@ import type { Asset, CreateAsset, UpdateAsset, AssetWithTags, AssetDetail, Tag }
 export default async function assetRoutes(app: FastifyInstance) {
   const db = app.db;
 
+  // Helper: resolve tags for an asset (system + user custom)
+  function resolveAssetTags(userId: string, assetId: number): Tag[] {
+    const database = db.getUserDatabase(userId);
+    return database.asset_tags
+      .filter((at) => at.asset_id === assetId)
+      .map((at) => db.findTagById(userId, at.tag_id)?.tag)
+      .filter((t): t is Tag => t !== undefined);
+  }
+
+  // Helper: check if tag exists (system or user custom)
+  function tagExists(userId: string, tagId: number): boolean {
+    return db.findTagById(userId, tagId) !== null;
+  }
+
   // GET /api/assets - List all assets with tags
   app.get<{ Reply: AssetWithTags[] }>('/assets', { onRequest: [app.authenticate] }, async (request, reply) => {
-    const database = db.getDatabase();
+    const userId = request.user!.sub;
+    const database = db.getUserDatabase(userId);
     const result: AssetWithTags[] = database.assets.map((asset) => {
-      const tags: Tag[] = database.asset_tags
-        .filter((at) => at.asset_id === asset.id)
-        .map((at) => database.tags.find((t) => t.id === at.tag_id))
-        .filter((t): t is Tag => t !== undefined);
+      const tags = resolveAssetTags(userId, asset.id);
       return { ...asset, tags };
     });
     return reply.send(result);
@@ -22,14 +34,15 @@ export default async function assetRoutes(app: FastifyInstance) {
     '/assets',
     { onRequest: [app.authenticate] },
     async (request, reply) => {
+      const userId = request.user!.sub;
       const data = request.body;
 
       if (!data.name || data.name.trim() === '') {
         return reply.code(400).send({ error: '资产名称不能为空' });
       }
 
-      const database = db.getDatabase();
-      const id = db.nextAssetId();
+      const database = db.getUserDatabase(userId);
+      const id = db.nextAssetId(userId);
       const now = new Date().toISOString();
 
       const asset: Asset = {
@@ -47,13 +60,13 @@ export default async function assetRoutes(app: FastifyInstance) {
       // Add tags if provided
       if (data.tag_ids && data.tag_ids.length > 0) {
         for (const tagId of data.tag_ids) {
-          if (database.tags.some((t) => t.id === tagId)) {
+          if (tagExists(userId, tagId)) {
             database.asset_tags.push({ asset_id: id, tag_id: tagId });
           }
         }
       }
 
-      await db.updateDatabase(database);
+      await db.persistUserDatabase(userId);
       return reply.code(201).send(asset);
     }
   );
@@ -63,12 +76,13 @@ export default async function assetRoutes(app: FastifyInstance) {
     '/assets/:id',
     { onRequest: [app.authenticate] },
     async (request, reply) => {
+      const userId = request.user!.sub;
       const id = parseInt(request.params.id, 10);
       if (isNaN(id)) {
         return reply.code(400).send({ error: '无效的资产ID' });
       }
 
-      const database = db.getDatabase();
+      const database = db.getUserDatabase(userId);
       const asset = database.assets.find((a) => a.id === id);
 
       if (!asset) {
@@ -76,10 +90,7 @@ export default async function assetRoutes(app: FastifyInstance) {
       }
 
       const transactions = database.transactions.filter((t) => t.asset_id === id);
-      const tags: Tag[] = database.asset_tags
-        .filter((at) => at.asset_id === id)
-        .map((at) => database.tags.find((t) => t.id === at.tag_id))
-        .filter((t): t is Tag => t !== undefined);
+      const tags = resolveAssetTags(userId, id);
 
       // Calculate summary
       const buyTxns = transactions.filter((t) => t.txn_type === 'BUY');
@@ -114,13 +125,14 @@ export default async function assetRoutes(app: FastifyInstance) {
     '/assets/:id',
     { onRequest: [app.authenticate] },
     async (request, reply) => {
+      const userId = request.user!.sub;
       const id = parseInt(request.params.id, 10);
       if (isNaN(id)) {
         return reply.code(400).send({ error: '无效的资产ID' });
       }
 
       const data = request.body;
-      const database = db.getDatabase();
+      const database = db.getUserDatabase(userId);
       const idx = database.assets.findIndex((a) => a.id === id);
 
       if (idx === -1) {
@@ -137,13 +149,13 @@ export default async function assetRoutes(app: FastifyInstance) {
       if (data.tag_ids !== undefined) {
         database.asset_tags = database.asset_tags.filter((at) => at.asset_id !== id);
         for (const tagId of data.tag_ids) {
-          if (database.tags.some((t) => t.id === tagId)) {
+          if (tagExists(userId, tagId)) {
             database.asset_tags.push({ asset_id: id, tag_id: tagId });
           }
         }
       }
 
-      await db.updateDatabase(database);
+      await db.persistUserDatabase(userId);
       return reply.send(database.assets[idx]);
     }
   );
@@ -153,12 +165,13 @@ export default async function assetRoutes(app: FastifyInstance) {
     '/assets/:id',
     { onRequest: [app.authenticate] },
     async (request, reply) => {
+      const userId = request.user!.sub;
       const id = parseInt(request.params.id, 10);
       if (isNaN(id)) {
         return reply.code(400).send({ error: '无效的资产ID' });
       }
 
-      const database = db.getDatabase();
+      const database = db.getUserDatabase(userId);
       const before = database.assets.length;
       database.assets = database.assets.filter((a) => a.id !== id);
 
@@ -169,7 +182,7 @@ export default async function assetRoutes(app: FastifyInstance) {
       database.transactions = database.transactions.filter((t) => t.asset_id !== id);
       database.asset_tags = database.asset_tags.filter((at) => at.asset_id !== id);
 
-      await db.updateDatabase(database);
+      await db.persistUserDatabase(userId);
       return reply.send({ success: true });
     }
   );
@@ -179,6 +192,7 @@ export default async function assetRoutes(app: FastifyInstance) {
     '/assets/:id/tags',
     { onRequest: [app.authenticate] },
     async (request, reply) => {
+      const userId = request.user!.sub;
       const assetId = parseInt(request.params.id, 10);
       if (isNaN(assetId)) {
         return reply.code(400).send({ error: '无效的资产ID' });
@@ -189,18 +203,18 @@ export default async function assetRoutes(app: FastifyInstance) {
         return reply.code(400).send({ error: 'tag_id 不能为空' });
       }
 
-      const database = db.getDatabase();
+      const database = db.getUserDatabase(userId);
 
       if (!database.assets.some((a) => a.id === assetId)) {
         return reply.code(404).send({ error: `资产 ${assetId} 不存在` });
       }
-      if (!database.tags.some((t) => t.id === tagId)) {
+      if (!tagExists(userId, tagId)) {
         return reply.code(404).send({ error: `标签 ${tagId} 不存在` });
       }
 
       if (!database.asset_tags.some((at) => at.asset_id === assetId && at.tag_id === tagId)) {
         database.asset_tags.push({ asset_id: assetId, tag_id: tagId });
-        await db.updateDatabase(database);
+        await db.persistUserDatabase(userId);
       }
 
       return reply.send({ success: true });
@@ -212,6 +226,7 @@ export default async function assetRoutes(app: FastifyInstance) {
     '/assets/:id/tags/:tagId',
     { onRequest: [app.authenticate] },
     async (request, reply) => {
+      const userId = request.user!.sub;
       const assetId = parseInt(request.params.id, 10);
       const tagId = parseInt(request.params.tagId, 10);
 
@@ -219,7 +234,7 @@ export default async function assetRoutes(app: FastifyInstance) {
         return reply.code(400).send({ error: '无效的ID' });
       }
 
-      const database = db.getDatabase();
+      const database = db.getUserDatabase(userId);
       const before = database.asset_tags.length;
       database.asset_tags = database.asset_tags.filter(
         (at) => !(at.asset_id === assetId && at.tag_id === tagId)
@@ -229,7 +244,7 @@ export default async function assetRoutes(app: FastifyInstance) {
         return reply.code(404).send({ error: `资产 ${assetId} 上没有标签 ${tagId}` });
       }
 
-      await db.updateDatabase(database);
+      await db.persistUserDatabase(userId);
       return reply.send({ success: true });
     }
   );

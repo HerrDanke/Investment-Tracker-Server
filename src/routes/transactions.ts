@@ -11,8 +11,9 @@ export default async function transactionRoutes(app: FastifyInstance) {
     '/transactions',
     { onRequest: [app.authenticate] },
     async (request, reply) => {
+      const userId = request.user!.sub;
       const q = request.query;
-      const database = db.getDatabase();
+      const database = db.getUserDatabase(userId);
       let txns = [...database.transactions];
 
       // Support both camelCase and snake_case query params
@@ -50,6 +51,7 @@ export default async function transactionRoutes(app: FastifyInstance) {
     '/transactions',
     { onRequest: [app.authenticate] },
     async (request, reply) => {
+      const userId = request.user!.sub;
       const data = request.body;
 
       // Validate transaction type
@@ -77,14 +79,14 @@ export default async function transactionRoutes(app: FastifyInstance) {
         return reply.code(400).send({ error: '税费必须为非负数' });
       }
 
-      const database = db.getDatabase();
+      const database = db.getUserDatabase(userId);
 
       // Verify asset exists
       if (!database.assets.some((a) => a.id === data.asset_id)) {
         return reply.code(404).send({ error: `资产 ${data.asset_id} 不存在` });
       }
 
-      const id = db.nextTransactionId();
+      const id = db.nextTransactionId(userId);
       const now = new Date().toISOString();
 
       const txn: Transaction = {
@@ -103,7 +105,7 @@ export default async function transactionRoutes(app: FastifyInstance) {
       };
 
       database.transactions.push(txn);
-      await db.updateDatabase(database);
+      await db.persistUserDatabase(userId);
 
       return reply.code(201).send(txn);
     }
@@ -114,12 +116,13 @@ export default async function transactionRoutes(app: FastifyInstance) {
     '/transactions/:id',
     { onRequest: [app.authenticate] },
     async (request, reply) => {
+      const userId = request.user!.sub;
       const id = parseInt(request.params.id, 10);
       if (isNaN(id)) {
         return reply.code(400).send({ error: '无效的交易ID' });
       }
 
-      const database = db.getDatabase();
+      const database = db.getUserDatabase(userId);
       const txn = database.transactions.find((t) => t.id === id);
 
       if (!txn) {
@@ -136,13 +139,14 @@ export default async function transactionRoutes(app: FastifyInstance) {
     '/transactions/:id',
     { onRequest: [app.authenticate] },
     async (request, reply) => {
+      const userId = request.user!.sub;
       const id = parseInt(request.params.id, 10);
       if (isNaN(id)) {
         return reply.code(400).send({ error: '无效的交易ID' });
       }
 
       const data = request.body;
-      const database = db.getDatabase();
+      const database = db.getUserDatabase(userId);
       const txn = database.transactions.find((t) => t.id === id);
 
       if (!txn) {
@@ -175,7 +179,7 @@ export default async function transactionRoutes(app: FastifyInstance) {
       if (data.notes !== undefined) txn.notes = data.notes;
       txn.updated_at = new Date().toISOString();
 
-      await db.updateDatabase(database);
+      await db.persistUserDatabase(userId);
       return reply.send(txn);
     }
   );
@@ -185,12 +189,13 @@ export default async function transactionRoutes(app: FastifyInstance) {
     '/transactions/:id',
     { onRequest: [app.authenticate] },
     async (request, reply) => {
+      const userId = request.user!.sub;
       const id = parseInt(request.params.id, 10);
       if (isNaN(id)) {
         return reply.code(400).send({ error: '无效的交易ID' });
       }
 
-      const database = db.getDatabase();
+      const database = db.getUserDatabase(userId);
       const before = database.transactions.length;
       database.transactions = database.transactions.filter((t) => t.id !== id);
 
@@ -198,7 +203,7 @@ export default async function transactionRoutes(app: FastifyInstance) {
         return reply.code(404).send({ error: `交易 ${id} 不存在` });
       }
 
-      await db.updateDatabase(database);
+      await db.persistUserDatabase(userId);
       return reply.send({ success: true });
     }
   );
