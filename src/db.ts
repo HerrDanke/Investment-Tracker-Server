@@ -175,6 +175,54 @@ class DatabaseManager {
 
     // Ensure default admin user exists
     await this.ensureAdminUser();
+
+    // Fix tag ID collisions in existing user data
+    await this.fixTagIdCollisions();
+  }
+
+  // ---- Fix tag ID collisions in existing user data ----
+  private async fixTagIdCollisions(): Promise<void> {
+    const maxSystemTagId = this.systemTags.length > 0 ? Math.max(...this.systemTags.map(t => t.id)) : 9;
+    let fixed = false;
+
+    for (const userId of this.userDbs.keys()) {
+      const db = this.userDbs.get(userId)!;
+      if (!db || db.tags.length === 0) continue;
+
+      // Check for collisions: custom tags with ID <= maxSystemTagId
+      const hasCollision = db.tags.some(t => t.id <= maxSystemTagId);
+      if (!hasCollision) continue;
+
+      // Remap colliding custom tag IDs
+      let nextId = maxSystemTagId + 1;
+      const idMap = new Map<number, number>();
+      for (const tag of db.tags) {
+        if (tag.id <= maxSystemTagId) {
+          idMap.set(tag.id, nextId);
+          tag.id = nextId;
+          nextId++;
+        }
+      }
+
+      // Update asset_tags references
+      for (const at of db.asset_tags) {
+        if (idMap.has(at.tag_id)) {
+          at.tag_id = idMap.get(at.tag_id)!;
+        }
+      }
+
+      // Update _seq.tags if needed
+      if (db._seq.tags <= maxSystemTagId) {
+        db._seq.tags = nextId - 1;
+      }
+
+      await this.persistUserDatabase(userId);
+      fixed = true;
+    }
+
+    if (fixed) {
+      console.log('Fixed tag ID collisions in user data');
+    }
   }
 
   // ---- User database file path ----
