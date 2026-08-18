@@ -185,6 +185,11 @@ class DatabaseManager {
     const maxSystemTagId = this.systemTags.length > 0 ? Math.max(...this.systemTags.map(t => t.id)) : 9;
     let fixed = false;
 
+    // Load ALL user data first (normally lazy-loaded)
+    for (const user of this.users) {
+      this.getUserDatabase(user.id);
+    }
+
     for (const userId of this.userDbs.keys()) {
       const db = this.userDbs.get(userId)!;
       if (!db || db.tags.length === 0) continue;
