@@ -19,6 +19,7 @@ import { HoldingsCard } from '../components/cards/HoldingsCard';
 import { summaryApi, transactionApi } from '../lib/api';
 import { loadDashboardLayout, saveDashboardLayout } from '../lib/dashboard-layout';
 import { getTypeLabel } from '../lib/utils';
+import { translateTagName } from '../lib/translations';
 import type {
   DashboardLayout, LayoutCard, CardType, ChartType,
   Summary, TransactionWithAsset,
@@ -141,7 +142,7 @@ export default function Dashboard() {
         case 'chart-tags': {
           const tagMap = new Map<string, number>();
           summary.assets.forEach(a => a.tags.forEach(t => tagMap.set(t.name, (tagMap.get(t.name) || 0) + a.holding_cost_basis)));
-          const data = Array.from(tagMap.entries()).filter(([, v]) => v > 0).map(([name, value]) => ({ name, value }));
+          const data = Array.from(tagMap.entries()).filter(([, v]) => v > 0).map(([name, value]) => ({ name: translateTagName(name, lang), value }));
           return <ChartCard title={t('dashboard.tag_distribution')} data={data} initialChartType={card.chartType} onChartTypeChange={(t) => changeChartType(card.id, t)} lang={lang} />;
         }
         case 'recent-trades':
