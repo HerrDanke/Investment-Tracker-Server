@@ -18,7 +18,7 @@ import { RecentTradesCard } from '../components/cards/RecentTradesCard';
 import { HoldingsCard } from '../components/cards/HoldingsCard';
 import { summaryApi, transactionApi } from '../lib/api';
 import { loadDashboardLayout, saveDashboardLayout } from '../lib/dashboard-layout';
-import { TYPE_LABELS } from '../lib/utils';
+import { getTypeLabel } from '../lib/utils';
 import type {
   DashboardLayout, LayoutCard, CardType, ChartType,
   Summary, TransactionWithAsset,

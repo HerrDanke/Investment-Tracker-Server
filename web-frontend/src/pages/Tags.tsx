@@ -52,7 +52,7 @@ export default function Tags() {
     if (!formName.trim()) return;
     setSaving(true);
     try {
-      const data: CreateTag = { name: formName, category: formCategory, formColor };
+      const data: CreateTag = { name: formName, category: formCategory, color: formColor };
       if (editingTag) {
         await tagApi.update(editingTag.id, data);
       } else {
