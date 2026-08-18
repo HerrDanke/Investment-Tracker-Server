@@ -1,6 +1,6 @@
 # Investment Tracker Server - Handoff
 
-> 最后更新：2026-08-18（第十二次更新 — 中英切换完整落地）
+> 最后更新：2026-08-18（第十三次更新 — 标签 ID 冲突修复 + 翻译完善）
 
 ## 项目概述
 
@@ -226,6 +226,11 @@ npm run build
 - [x] 看板卡片标题居中、拖拽手柄增大
 - [x] 移动端导航栏遮挡修复
 - [x] 中英切换功能（完整落地：所有页面 + 卡片组件 + 工具函数）
+- [x] 系统标签名称中英文映射（translateTagName）
+- [x] 标签 ID 冲突修复（迁移时 ID 分配 + 启动时检测修复）
+- [x] 交易页移动端卡片布局
+- [x] 看板卡片标题居中、拖拽手柄增大
+- [x] 移动端导航栏遮挡修复
 
 ## Docker 部署（2026-08-18 更新）
 
@@ -291,6 +296,14 @@ docker run --rm -v investment-tracker-server_investment-data:/data -v $(pwd):/ba
 ## Git 历史
 
 ```
+c3a1f6f fix: 修复标签 ID 冲突检测时机问题
+9f1678f fix: 启动时检测并修复已有数据中的标签 ID 冲突
+1abdbda fix: 修复自定义标签 ID 与系统标签冲突
+9fcc086 fix: 资产页筛选标签翻译
+e7afebe feat: 资产表单完整中英翻译
+3320d2a fix: 修复 translateTagName 类型错误
+d53a8d8 feat: 系统标签名称中英文翻译
+b65619d feat: 交易页面完整中英翻译
 54f53c8 feat: 中英切换功能完整落地（所有页面翻译）
 028d3a0 docs: 更新 README 和 HANDOFF 文档
 99ae665 feat: 中英切换功能（i18n 基础设施 + 登录页）
