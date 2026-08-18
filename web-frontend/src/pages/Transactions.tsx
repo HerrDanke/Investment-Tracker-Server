@@ -148,7 +148,8 @@ export default function Transactions() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-x-auto">
+      {/* Desktop table - visible on md+ */}
+      <div className="hidden md:block bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-x-auto">
         <table className="w-full text-sm table-fixed" style={{ minWidth: totalWidth + 'px' }}>
           <thead>
             <tr className="border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
@@ -196,6 +197,42 @@ export default function Transactions() {
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile card layout - visible below md */}
+      <div className="md:hidden space-y-3">
+        {transactions.length === 0 && (
+          <div className="text-center py-12 text-zinc-400 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800">暂无交易记录</div>
+        )}
+        {transactions.map(txn => {
+          const amount = txn.txn_type === 'DIVIDEND' ? 0 : (txn.price || 0) * (txn.quantity || 0) + (txn.fee || 0) + (txn.tax || 0);
+          return (
+            <div key={txn.id} className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-medium">{txn.asset?.name || '#' + txn.asset_id}</span>
+                <span className={`px-2 py-0.5 rounded text-xs font-medium ${txn.txn_type === 'BUY' ? 'bg-green-100 text-green-700' : txn.txn_type === 'DIVIDEND' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'}`}>
+                  {TXN_LABELS[txn.txn_type] || txn.txn_type}
+                </span>
+              </div>
+              <div className="text-sm text-zinc-500">{txn.date}</div>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div><span className="text-zinc-400">价格:</span> {txn.price?.toFixed(2) ?? '-'}</div>
+                <div><span className="text-zinc-400">数量:</span> {txn.quantity}</div>
+                <div><span className="text-zinc-400">手续费:</span> {txn.fee?.toFixed(2) ?? '-'}</div>
+                <div><span className="text-zinc-400">金额:</span> {txn.txn_type === 'DIVIDEND' ? '-' : fmt(amount)}</div>
+              </div>
+              {txn.notes && <div className="text-sm text-zinc-400 truncate">{txn.notes}</div>}
+              <div className="flex justify-end gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                <button onClick={() => { setEditingTxn(txn); setShowForm(true) }} className="flex items-center gap-1 px-3 py-1.5 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg">
+                  <Edit2 size={14} className="text-zinc-400" /> 编辑
+                </button>
+                <button onClick={() => handleDelete(txn.id)} className="flex items-center gap-1 px-3 py-1.5 text-sm hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
+                  <Trash2 size={14} className="text-red-400" /> 删除
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {showForm && (
