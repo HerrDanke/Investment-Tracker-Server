@@ -137,6 +137,16 @@ export const translations: Record<Lang, Record<string, string>> = {
     'transactions.div_amount': '分红金额',
     'transactions.no_asset': '未知资产',
     'transactions.delete_confirm': '确定删除该交易？',
+    'transactions.page_size': '每页显示',
+    'transactions.page_size_10': '10 条',
+    'transactions.page_size_20': '20 条',
+    'transactions.page_size_30': '30 条',
+    'transactions.page_size_40': '40 条',
+    'transactions.page_size_50': '50 条',
+    'transactions.page_info': '第 {page}/{total} 页',
+    'transactions.total_count': '共 {count} 条',
+    'transactions.prev': '上一页',
+    'transactions.next': '下一页',
 
     // Tags
     'tags.title': '标签管理',
@@ -314,6 +324,16 @@ export const translations: Record<Lang, Record<string, string>> = {
     'transactions.div_amount': 'Dividend',
     'transactions.no_asset': 'Unknown',
     'transactions.delete_confirm': 'Delete this transaction?',
+    'transactions.page_size': 'Per page',
+    'transactions.page_size_10': '10',
+    'transactions.page_size_20': '20',
+    'transactions.page_size_30': '30',
+    'transactions.page_size_40': '40',
+    'transactions.page_size_50': '50',
+    'transactions.page_info': 'Page {page}/{total}',
+    'transactions.total_count': '{count} total',
+    'transactions.prev': 'Previous',
+    'transactions.next': 'Next',
 
     // Tags
     'tags.title': 'Tags',

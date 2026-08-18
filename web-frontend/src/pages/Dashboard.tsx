@@ -53,7 +53,7 @@ export default function Dashboard() {
   const loadAllData = useCallback(() => {
     setLayout(loadDashboardLayout());
     summaryApi.get().then(setSummary).catch(e => setError(String(e)));
-    transactionApi.list().then(setTransactions).catch(e => setError(String(e)));
+    transactionApi.list().then(res => setTransactions(res.data)).catch(e => setError(String(e)));
   }, []);
 
   useEffect(() => { loadAllData(); }, [loadAllData]);

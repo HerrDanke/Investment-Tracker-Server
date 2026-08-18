@@ -6,8 +6,8 @@ const VALID_TXN_TYPES = ['buy', 'sell', 'dividend'];
 export default async function transactionRoutes(app: FastifyInstance) {
   const db = app.db;
 
-  // GET /api/transactions - List transactions with optional filters
-  app.get<{ Querystring: { assetId?: string; asset_id?: string; type?: string; txn_type?: string; txnType?: string; startDate?: string; start_date?: string; endDate?: string; end_date?: string }; Reply: TransactionWithAsset[] }>(
+  // GET /api/transactions - List transactions with optional filters and pagination
+  app.get<{ Querystring: { assetId?: string; asset_id?: string; type?: string; txn_type?: string; txnType?: string; startDate?: string; start_date?: string; endDate?: string; end_date?: string; page?: string; page_size?: string }; Reply: { data: TransactionWithAsset[]; total: number; page: number; page_size: number; total_pages: number } }>(
     '/transactions',
     { onRequest: [app.authenticate] },
     async (request, reply) => {
@@ -37,12 +37,24 @@ export default async function transactionRoutes(app: FastifyInstance) {
         txns = txns.filter((t) => t.date <= endDate);
       }
 
-      const result: any[] = txns.map((t) => {
+      // Sort by date descending (newest first)
+      txns.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+      // Pagination
+      const page = Math.max(1, parseInt(q.page || '1', 10) || 1);
+      const pageSize = Math.max(1, parseInt(q.page_size || '20', 10) || 20);
+      const total = txns.length;
+      const totalPages = Math.max(1, Math.ceil(total / pageSize));
+      const safePage = Math.min(page, totalPages);
+      const offset = (safePage - 1) * pageSize;
+      const paginated = txns.slice(offset, offset + pageSize);
+
+      const data: any[] = paginated.map((t) => {
         const asset = database.assets.find((a) => a.id === t.asset_id) ?? null;
         return { ...t, asset };
       });
 
-      return reply.send(result);
+      return reply.send({ data, total, page: safePage, page_size: pageSize, total_pages: totalPages });
     }
   );
 

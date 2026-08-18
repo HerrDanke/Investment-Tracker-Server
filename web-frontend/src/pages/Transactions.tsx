@@ -35,6 +35,10 @@ export default function Transactions() {
   const [filterType, setFilterType] = useState<string>('');
   const [colWidths, setColWidths] = useState<Record<string, number>>(loadColWidths());
   const [resizingCol, setResizingCol] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const widthsRef = useRef(colWidths);
   const resizingRef = useRef<{ col: string; startX: number; startWidth: number } | null>(null);
 
@@ -47,20 +51,26 @@ export default function Transactions() {
   const loadTransactions = useCallback(async () => {
     try {
       setLoading(true);
-      const params: any = {};
+      const params: any = { page, page_size: pageSize };
       if (filterAsset) params.asset_id = filterAsset;
       if (filterType) params.txn_type = filterType;
-      const data = await transactionApi.list(params);
-      data.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-      setTransactions(data);
+      const result = await transactionApi.list(params);
+      setTransactions(result.data);
+      setTotalCount(result.total);
+      setTotalPages(result.total_pages);
+      // Sync in case backend clamped the page
+      if (result.page !== page) setPage(result.page);
     } catch (e: any) {
       setError(e.message);
     } finally {
       setLoading(false);
     }
-  }, [filterAsset, filterType]);
+  }, [filterAsset, filterType, page, pageSize]);
 
   useEffect(() => { loadTransactions(); }, [loadTransactions]);
+
+  // Reset to first page when filters change
+  useEffect(() => { setPage(1); }, [filterAsset, filterType, pageSize]);
 
   const loadAssets = useCallback(async () => {
     try {
@@ -147,7 +157,21 @@ export default function Transactions() {
             <option value="">{t('transactions.all_types')}</option>
             {TXN_TYPES.map(t => <option key={t} value={t}>{getTxnLabel(t, lang)}</option>)}
           </select>
+          <select value={pageSize} onChange={e => setPageSize(Number(e.target.value))}
+            className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-transparent text-sm">
+            <option value={10}>{t('transactions.page_size_10')}</option>
+            <option value={20}>{t('transactions.page_size_20')}</option>
+            <option value={30}>{t('transactions.page_size_30')}</option>
+            <option value={40}>{t('transactions.page_size_40')}</option>
+            <option value={50}>{t('transactions.page_size_50')}</option>
+          </select>
         </div>
+      </div>
+
+      {/* Pagination info */}
+      <div className="flex items-center justify-between text-sm text-zinc-500">
+        <span>{t('transactions.total_count').replace('{count}', String(totalCount))}</span>
+        <span>{t('transactions.page_info').replace('{page}', String(page)).replace('{total}', String(totalPages))}</span>
       </div>
 
       {/* Desktop table - visible on md+ */}
@@ -236,6 +260,23 @@ export default function Transactions() {
           );
         })}
       </div>
+
+      {/* Pagination controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-3 pt-2">
+          <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}
+            className="px-4 py-2 text-sm rounded-lg border border-zinc-300 dark:border-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+            {t('transactions.prev')}
+          </button>
+          <span className="text-sm text-zinc-500 tabular-nums">
+            {page} / {totalPages}
+          </span>
+          <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}
+            className="px-4 py-2 text-sm rounded-lg border border-zinc-300 dark:border-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+            {t('transactions.next')}
+          </button>
+        </div>
+      )}
 
       {showForm && (
         <TransactionForm transaction={editingTxn} onClose={() => setShowForm(false)} onSave={() => {

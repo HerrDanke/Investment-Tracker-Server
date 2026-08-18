@@ -27,3 +27,4 @@ data-backup-*.json
 
 # Scripts (keep deploy.sh but ignore local test scripts)
 scripts/test-*.sh
+.bitfun/

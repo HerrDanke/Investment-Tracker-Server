@@ -43,8 +43,8 @@ export const assetApi = {
 }
 
 export const transactionApi = {
-  list: (params?: { asset_id?: number; txn_type?: string; start_date?: string; end_date?: string }) =>
-    api.get<TransactionWithAsset[]>('/transactions', { params }).then(r => r.data),
+  list: (params?: { asset_id?: number; txn_type?: string; start_date?: string; end_date?: string; page?: number; page_size?: number }) =>
+    api.get<{ data: TransactionWithAsset[]; total: number; page: number; page_size: number; total_pages: number }>('/transactions', { params }).then(r => r.data),
   get: (id: number) => api.get<TransactionWithAsset>(`/transactions/${id}`).then(r => r.data),
   create: (data: CreateTransaction) => api.post('/transactions', data).then(r => r.data),
   update: (id: number, data: Partial<CreateTransaction>) => api.patch(`/transactions/${id}`, data).then(r => r.data),
