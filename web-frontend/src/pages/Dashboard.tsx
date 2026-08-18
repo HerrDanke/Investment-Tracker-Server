@@ -199,7 +199,7 @@ export default function Dashboard() {
       >
         <SortableContext items={layout.cards.map(c => c.id)} strategy={rectSortingStrategy}>
           <div
-            className="flex-1 grid gap-4 auto-rows-min"
+            className="flex-1 grid gap-4 auto-rows-min dashboard-grid"
             style={{ gridTemplateColumns: `repeat(${GRID_COLUMNS}, 1fr)` }}
           >
             {layout.cards.map(card => (

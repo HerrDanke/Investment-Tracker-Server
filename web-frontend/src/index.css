@@ -92,3 +92,29 @@
     background-color: hsl(240 10% 8%);
   }
 }
+
+/* Mobile table responsiveness */
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile: dashboard single column */
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .dashboard-grid > div {
+    grid-column: span 1 !important;
+  }
+}
+
+/* Safe area for mobile devices */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

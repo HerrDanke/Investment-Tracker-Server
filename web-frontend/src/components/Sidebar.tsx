@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, PiggyBank, ArrowLeftRight, Tags, Database, Moon, Sun, LogOut, User, Shield, KeyRound } from 'lucide-react';
+import { LayoutDashboard, PiggyBank, ArrowLeftRight, Tags, Database, Moon, Sun, LogOut, User, Shield, KeyRound, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const navItems = [
@@ -13,9 +13,11 @@ const navItems = [
 
 interface Props {
   onDataClick: () => void;
+  mobileOpen: boolean;
+  onMobileClose: () => void;
 }
 
-export default function Sidebar({ onDataClick }: Props) {
+export default function Sidebar({ onDataClick, mobileOpen, onMobileClose }: Props) {
   const { user, logout, isAdmin } = useAuth();
   const [dark, setDark] = useState(() => {
     try {
@@ -30,14 +32,26 @@ export default function Sidebar({ onDataClick }: Props) {
     localStorage.setItem('theme', dark ? 'dark' : 'light');
   }, [dark]);
 
-  return (
-    <aside className="w-64 bg-zinc-900 dark:bg-zinc-950 text-white h-screen p-4 flex flex-col fixed left-0 top-0 overflow-y-auto">
-      <h1 className="text-xl font-bold mb-8 px-2">投资追踪</h1>
+  const handleNavClick = () => {
+    onMobileClose();
+  };
+
+  const sidebarContent = (isMobile: boolean) => (
+    <>
+      <div className="flex items-center justify-between mb-8 px-2">
+        <h1 className="text-xl font-bold">投资追踪</h1>
+        {isMobile && (
+          <button onClick={onMobileClose} className="p-1 hover:bg-zinc-800 rounded">
+            <X size={20} />
+          </button>
+        )}
+      </div>
       <nav className="space-y-1 flex-1">
         {navItems.filter(item => !item.adminOnly || isAdmin).map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
+            onClick={handleNavClick}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                 isActive ? 'bg-blue-600 text-white' : 'text-zinc-300 hover:bg-zinc-800'
@@ -51,7 +65,7 @@ export default function Sidebar({ onDataClick }: Props) {
       </nav>
       <div className="border-t border-zinc-700 pt-4 space-y-1">
         <button
-          onClick={onDataClick}
+          onClick={() => { onDataClick(); onMobileClose(); }}
           className="flex items-center gap-3 px-3 py-2 rounded-lg text-zinc-300 hover:bg-zinc-800 w-full text-left transition-colors"
         >
           <Database size={20} />
@@ -59,6 +73,7 @@ export default function Sidebar({ onDataClick }: Props) {
         </button>
         <NavLink
           to="/password"
+          onClick={handleNavClick}
           className={({ isActive }) =>
             `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
               isActive ? 'bg-blue-600 text-white' : 'text-zinc-300 hover:bg-zinc-800'
@@ -96,6 +111,25 @@ export default function Sidebar({ onDataClick }: Props) {
           </button>
         </div>
       )}
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar - always visible on md+ */}
+      <aside className="hidden md:flex w-64 bg-zinc-900 dark:bg-zinc-950 text-white h-screen p-4 flex-col fixed left-0 top-0 overflow-y-auto z-40">
+        {sidebarContent(false)}
+      </aside>
+
+      {/* Mobile sidebar - overlay */}
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-0 z-50 flex">
+          <div className="w-64 bg-zinc-900 dark:bg-zinc-950 text-white h-full p-4 flex flex-col overflow-y-auto shadow-xl">
+            {sidebarContent(true)}
+          </div>
+          <div className="flex-1 bg-black/50" onClick={onMobileClose} />
+        </div>
+      )}
+    </>
   );
 }

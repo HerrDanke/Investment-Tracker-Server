@@ -166,8 +166,8 @@ export default function Users() {
       {users.length === 0 ? (
         <div className="text-center py-12 text-zinc-400">暂无用户</div>
       ) : (
-        <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden table-container">
+          <table className="w-full text-sm min-w-[400px]">
             <thead className="bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700">
               <tr>
                 <th className="text-left px-4 py-3 font-medium text-zinc-500">用户名</th>
