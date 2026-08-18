@@ -1,15 +1,9 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, PiggyBank, ArrowLeftRight, Tags, Database, Moon, Sun, LogOut, User, Shield, KeyRound, X } from 'lucide-react';
+import { LayoutDashboard, PiggyBank, ArrowLeftRight, Tags, Database, Moon, Sun, LogOut, User, Shield, KeyRound, X, Languages } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-
-const navItems = [
-  { to: '/', icon: LayoutDashboard, label: '概览' },
-  { to: '/assets', icon: PiggyBank, label: '资产' },
-  { to: '/transactions', icon: ArrowLeftRight, label: '交易' },
-  { to: '/tags', icon: Tags, label: '标签' },
-  { to: '/users', icon: Shield, label: '用户管理', adminOnly: true },
-];
+import { useLang } from '../context/LanguageContext';
+import type { Lang } from '../lib/translations';
 
 interface Props {
   onDataClick: () => void;
@@ -19,6 +13,7 @@ interface Props {
 
 export default function Sidebar({ onDataClick, mobileOpen, onMobileClose }: Props) {
   const { user, logout, isAdmin } = useAuth();
+  const { lang, setLang, t } = useLang();
   const [dark, setDark] = useState(() => {
     try {
       return localStorage.getItem('theme') === 'dark';
@@ -36,10 +31,22 @@ export default function Sidebar({ onDataClick, mobileOpen, onMobileClose }: Prop
     onMobileClose();
   };
 
+  const toggleLang = () => {
+    setLang(lang === 'zh' ? 'en' : 'zh');
+  };
+
+  const navItems = [
+    { to: '/', icon: LayoutDashboard, label: t('nav.overview') },
+    { to: '/assets', icon: PiggyBank, label: t('nav.assets') },
+    { to: '/transactions', icon: ArrowLeftRight, label: t('nav.transactions') },
+    { to: '/tags', icon: Tags, label: t('nav.tags') },
+    { to: '/users', icon: Shield, label: t('nav.users'), adminOnly: true },
+  ];
+
   const sidebarContent = (isMobile: boolean) => (
     <>
       <div className="flex items-center justify-between mb-8 px-2">
-        <h1 className="text-xl font-bold">投资追踪</h1>
+        <h1 className="text-xl font-bold">{t('app.name')}</h1>
         {isMobile && (
           <button onClick={onMobileClose} className="p-1 hover:bg-zinc-800 rounded">
             <X size={20} />
@@ -69,7 +76,7 @@ export default function Sidebar({ onDataClick, mobileOpen, onMobileClose }: Prop
           className="flex items-center gap-3 px-3 py-2 rounded-lg text-zinc-300 hover:bg-zinc-800 w-full text-left transition-colors"
         >
           <Database size={20} />
-          <span>数据管理</span>
+          <span>{t('nav.data')}</span>
         </button>
         <NavLink
           to="/password"
@@ -81,14 +88,21 @@ export default function Sidebar({ onDataClick, mobileOpen, onMobileClose }: Prop
           }
         >
           <KeyRound size={20} />
-          <span>修改密码</span>
+          <span>{t('nav.password')}</span>
         </NavLink>
         <button
           onClick={() => setDark(!dark)}
           className="flex items-center gap-3 px-3 py-2 rounded-lg text-zinc-300 hover:bg-zinc-800 w-full text-left transition-colors"
         >
           {dark ? <Sun size={20} /> : <Moon size={20} />}
-          <span>{dark ? '浅色模式' : '深色模式'}</span>
+          <span>{dark ? t('nav.light') : t('nav.dark')}</span>
+        </button>
+        <button
+          onClick={toggleLang}
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-zinc-300 hover:bg-zinc-800 w-full text-left transition-colors"
+        >
+          <Languages size={20} />
+          <span>{t('nav.language')}</span>
         </button>
       </div>
       {/* User section at bottom */}
@@ -107,7 +121,7 @@ export default function Sidebar({ onDataClick, mobileOpen, onMobileClose }: Prop
             className="flex items-center gap-3 px-3 py-2 rounded-lg text-zinc-300 hover:bg-red-900/30 hover:text-red-400 w-full text-left transition-colors"
           >
             <LogOut size={20} />
-            <span>退出登录</span>
+            <span>{t('nav.logout')}</span>
           </button>
         </div>
       )}
