@@ -25,7 +25,7 @@ export default function Layout({ onDataClick }: Props) {
         <span className="ml-3 font-semibold">投资追踪</span>
       </div>
 
-      <main className="flex-1 p-4 pt-18 md:p-8 md:pt-8 overflow-auto md:ml-64">
+      <main className="flex-1 p-4 pt-20 md:p-8 md:pt-8 overflow-auto md:ml-64">
         <Outlet />
       </main>
     </div>
