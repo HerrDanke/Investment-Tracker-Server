@@ -306,6 +306,73 @@ class DatabaseManager {
     return this.dataDir;
   }
 
+
+  // ---- Admin helpers ----
+  // Determine if a user is the admin. Admin is the user whose username matches
+  // the ADMIN_USERNAME env var; if unset, the first registered user is admin.
+  isAdmin(userId: string): boolean {
+    const user = this.users.find((u) => u.id === userId);
+    if (!user) return false;
+    const adminUsername = process.env.ADMIN_USERNAME;
+    if (adminUsername) return user.username === adminUsername;
+    // Fallback: first registered user is admin
+    return this.users.length > 0 && this.users[0].id === userId;
+  }
+
+  // List all users (safe summary without password hashes)
+  listUsers(): { id: string; username: string; created_at: string }[] {
+    return this.users.map((u) => ({
+      id: u.id,
+      username: u.username,
+      created_at: u.created_at,
+    }));
+  }
+
+  // Delete a user and all their data files. Returns false if not found.
+  async deleteUser(userId: string): Promise<boolean> {
+    const idx = this.users.findIndex((u) => u.id === userId);
+    if (idx === -1) return false;
+
+    const target = this.users[idx];
+    // Prevent deleting the admin account
+    const adminUsername = process.env.ADMIN_USERNAME;
+    if (adminUsername && target.username === adminUsername) {
+      throw new Error('不能删除管理员账户');
+    }
+    if (!adminUsername && this.users[0].id === userId) {
+      throw new Error('不能删除管理员账户');
+    }
+
+    // Remove user from list
+    this.users.splice(idx, 1);
+    await this.persistUsers();
+
+    // Remove from cache
+    this.userDbs.delete(userId);
+
+    // Delete user data file
+    try {
+      await fs.unlink(this.userDbPath(userId));
+    } catch (err: any) {
+      if (err.code !== 'ENOENT') {
+        console.error(`Failed to delete data file for user ${userId}:`, err);
+      }
+    }
+
+    // Delete user backups
+    try {
+      const files = await fs.readdir(this.dataDir);
+      const backups = files.filter((f) => f.startsWith(`data-${userId}-backup-`));
+      for (const f of backups) {
+        await fs.unlink(path.join(this.dataDir, f));
+      }
+    } catch (err: any) {
+      console.error(`Failed to delete backups for user ${userId}:`, err);
+    }
+
+    return true;
+  }
+
   // ---- Legacy data migration ----
   private async migrateLegacyData(): Promise<void> {
     // No users or no legacy file → nothing to migrate

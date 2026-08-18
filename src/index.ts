@@ -11,6 +11,7 @@ import transactionRoutes from './routes/transactions';
 import tagRoutes from './routes/tags';
 import summaryRoutes from './routes/summary';
 import exportImportRoutes from './routes/export-import';
+import adminRoutes from './routes/admin';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -93,6 +94,7 @@ async function buildServer() {
   await app.register(tagRoutes, { prefix: '/api' });
   await app.register(summaryRoutes, { prefix: '/api' });
   await app.register(exportImportRoutes, { prefix: '/api' });
+  await app.register(adminRoutes, { prefix: '/api' });
 
   return app;
 }
