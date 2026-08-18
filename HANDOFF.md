@@ -1,6 +1,6 @@
 # Investment Tracker Server - Handoff
 
-> 最后更新：2026-08-18（第十三次更新 — 标签 ID 冲突修复 + 翻译完善）
+> 最后更新：2026-08-18（第十四次更新 — 交易列表分页 + 分支合并 main）
 
 ## 项目概述
 
@@ -41,7 +41,7 @@ Investment Tracker Server/
 │   └── routes/
 │       ├── auth.ts           # 注册/登录/修改密码
 │       ├── assets.ts         # 资产 CRUD + 标签
-│       ├── transactions.ts   # 交易 CRUD + 过滤
+│       ├── transactions.ts   # 交易 CRUD + 过滤 + 分页
 │       ├── tags.ts           # 标签 CRUD（混合模型）
 │       ├── summary.ts        # 投资汇总统计
 │       ├── export-import.ts  # 数据导出导入
@@ -109,7 +109,7 @@ Investment Tracker Server/
 | DELETE | `/api/assets/:id` | 删除资产 |
 | POST | `/api/assets/:id/tags` | 资产添加标签 |
 | DELETE | `/api/assets/:id/tags/:tagId` | 移除资产标签 |
-| GET | `/api/transactions` | 交易列表（支持过滤） |
+| GET | `/api/transactions` | 交易列表（支持过滤 + `page`/`page_size` 分页） |
 | POST | `/api/transactions` | 创建交易 |
 | GET | `/api/transactions/:id` | 交易详情 |
 | PATCH | `/api/transactions/:id` | 更新交易 |
@@ -200,6 +200,7 @@ npm run build
 - [x] 多用户数据隔离（每用户独立文件）
 - [x] 管理员系统（用户管理、系统标签管理）
 - [x] 管理员账户保护（不可删除）
+- [x] 交易列表分页（后端分页 API + 前端每页条数选择器 10/20/30/40/50）
 
 ### 前端
 - [x] 登录/注册页面（表单验证+错误提示）
@@ -227,6 +228,7 @@ npm run build
 - [x] 移动端导航栏遮挡修复
 - [x] 中英切换功能（完整落地：所有页面 + 卡片组件 + 工具函数）
 - [x] 系统标签名称中英文映射（translateTagName）
+- [x] 交易列表分页（每页条数选择器 + 上一页/下一页控件，筛选自动回第一页）
 - [x] 标签 ID 冲突修复（迁移时 ID 分配 + 启动时检测修复）
 - [x] 交易页移动端卡片布局
 - [x] 看板卡片标题居中、拖拽手柄增大
@@ -258,13 +260,12 @@ docker run --rm -v investment-tracker-server_investment-data:/data -v $(pwd):/ba
 
 ## 已知限制
 
-1. **无分页**：交易列表全量加载，数据量大时可能影响性能
-2. **无汇率**：多货币场景未做汇率转换
-3. **导入覆盖**：导入会覆盖当前用户数据（自动创建备份，保留最近 5 份）
+1. **无汇率**：多货币场景未做汇率转换
+2. **导入覆盖**：导入会覆盖当前用户数据（自动创建备份，保留最近 5 份）
 
 ## 待办事项
 
-- [ ] 交易列表分页
+- [x] 交易列表分页
 - [ ] 多货币汇率转换
 - [ ] 数据导入合并策略
 - [ ] 单元测试
@@ -296,6 +297,7 @@ docker run --rm -v investment-tracker-server_investment-data:/data -v $(pwd):/ba
 ## Git 历史
 
 ```
+e3913d7 feat: 交易列表分页支持，可选 10/20/30/40/50 条每页
 c3a1f6f fix: 修复标签 ID 冲突检测时机问题
 9f1678f fix: 启动时检测并修复已有数据中的标签 ID 冲突
 1abdbda fix: 修复自定义标签 ID 与系统标签冲突

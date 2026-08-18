@@ -5,7 +5,7 @@
 ## 功能特性
 
 - **资产管理**：添加/编辑投资标的（股票、基金、ETF 等），支持代码、类型、币种，可按标签筛选
-- **交易记录**：买入/卖出/分红，含价格、数量、手续费、税收、日期，列宽可调整
+- **交易记录**：买入/卖出/分红，含价格、数量、手续费、税收、日期，列宽可调整，支持分页（10/20/30/40/50 条每页）
 - **标签系统**：预设系统标签（A股/港股/美股/基金/宽基指数）全局共享（只读）+ 自定义标签按用户独立
 - **数据导出/导入**：JSON 格式备份与恢复，导出可选保存路径，导入自动创建备份
 - **深色模式**：自动跟随系统 + 手动切换，优化可读性
@@ -151,7 +151,7 @@ docker run --rm -v investment-tracker-server_investment-data:/data -v $(pwd):/ba
 | DELETE | `/api/assets/:id` | 删除资产 |
 | POST | `/api/assets/:id/tags` | 为资产添加标签 |
 | DELETE | `/api/assets/:id/tags/:tagId` | 移除资产标签 |
-| GET | `/api/transactions` | 交易列表（支持 `asset_id`/`txn_type`/`start_date`/`end_date` 过滤） |
+| GET | `/api/transactions` | 交易列表（支持 `asset_id`/`txn_type`/`start_date`/`end_date` 过滤，支持 `page`/`page_size` 分页） |
 | POST | `/api/transactions` | 创建交易 |
 | GET | `/api/transactions/:id` | 交易详情 |
 | PATCH | `/api/transactions/:id` | 更新交易 |
