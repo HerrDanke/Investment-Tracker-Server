@@ -132,7 +132,7 @@ export default function Assets() {
                       : 'text-zinc-600 dark:text-zinc-400 border border-zinc-300 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500'
                   }`}
                   style={isActive ? { backgroundColor: tag.color } : {}}>
-                  {tag.name}
+                  {tag.category === 'system' ? translateTagName(tag.name, lang as 'zh' | 'en') : tag.name}
                 </button>
               );
             })}
