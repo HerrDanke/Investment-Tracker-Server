@@ -241,31 +241,28 @@ class DatabaseManager {
 
   // ---- Default admin user ----
   // Ensures a default admin account exists on startup.
-  // ADMIN_USERNAME (default: admin) and ADMIN_PASSWORD (default: admin123) control the credentials.
-  // If the admin user already exists, its password is reset to the configured default.
+  // ADMIN_USERNAME (default: admin) and ADMIN_PASSWORD control the credentials.
+  // If the admin user already exists, its password is NOT changed.
+  // Without ADMIN_PASSWORD set, no default admin is created (must register normally).
   async ensureAdminUser(): Promise<void> {
     const adminUsername = process.env.ADMIN_USERNAME || 'admin';
-    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    if (!adminPassword) return; // No password configured — don't create default admin
 
     const existing = this.users.find((u) => u.username === adminUsername);
+    if (existing) return; // Admin already exists — don't overwrite password
+
     const passwordHash = await argon2.hash(adminPassword);
     const now = new Date().toISOString();
-
-    if (existing) {
-      existing.password_hash = passwordHash;
-      await this.persistUsers();
-      console.log(`Admin user "${adminUsername}" password reset to configured default`);
-    } else {
-      const adminUser: User = {
-        id: crypto.randomUUID(),
-        username: adminUsername,
-        password_hash: passwordHash,
-        created_at: now,
-      };
-      this.users.push(adminUser);
-      await this.persistUsers();
-      console.log(`Created default admin user "${adminUsername}"`);
-    }
+    const adminUser: User = {
+      id: crypto.randomUUID(),
+      username: adminUsername,
+      password_hash: passwordHash,
+      created_at: now,
+    };
+    this.users.push(adminUser);
+    await this.persistUsers();
+    console.log(`Created default admin user "${adminUsername}"`);
   }
 
   // ---- System tags management ----
@@ -343,13 +340,19 @@ class DatabaseManager {
 
   // ---- Admin helpers ----
   // Determine if a user is the admin. Admin is the user whose username matches
-  // the ADMIN_USERNAME env var; if unset, the first registered user is admin.
+  // the ADMIN_USERNAME env var. If that user doesn't exist yet, the first
+  // registered user is admin (graceful fallback for fresh deploys).
   isAdmin(userId: string): boolean {
     const user = this.users.find((u) => u.id === userId);
     if (!user) return false;
     const adminUsername = process.env.ADMIN_USERNAME;
-    if (adminUsername) return user.username === adminUsername;
-    // Fallback: first registered user is admin
+    if (adminUsername) {
+      const adminUser = this.users.find((u) => u.username === adminUsername);
+      if (adminUser) return adminUser.id === userId;
+      // Admin user not yet registered — first user is admin
+      return this.users.length > 0 && this.users[0].id === userId;
+    }
+    // No ADMIN_USERNAME set — first registered user is admin
     return this.users.length > 0 && this.users[0].id === userId;
   }
 
@@ -369,11 +372,7 @@ class DatabaseManager {
 
     const target = this.users[idx];
     // Prevent deleting the admin account
-    const adminUsername = process.env.ADMIN_USERNAME;
-    if (adminUsername && target.username === adminUsername) {
-      throw new Error('不能删除管理员账户');
-    }
-    if (!adminUsername && this.users[0].id === userId) {
+    if (this.isAdmin(userId)) {
       throw new Error('不能删除管理员账户');
     }
 

@@ -78,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAdmin(false);
   }
 
-  const value = useMemo(() => ({ user, token, loading, login, register, logout, isAdmin }), [user, token, loading]);
+  const value = useMemo(() => ({ user, token, loading, login, register, logout, isAdmin }), [user, token, loading, isAdmin]);
 
   return (
     <AuthContext.Provider value={value}>

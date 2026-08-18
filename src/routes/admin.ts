@@ -8,7 +8,7 @@ export default async function adminRoutes(app: FastifyInstance) {
   async function requireAdmin(request: import('fastify').FastifyRequest, reply: import('fastify').FastifyReply) {
     const userId = request.user!.sub;
     if (!db.isAdmin(userId)) {
-      reply.code(403).send({ error: '需要管理员权限' });
+      return reply.code(403).send({ error: '需要管理员权限' });
     }
   }
 

@@ -94,7 +94,7 @@ async function buildServer() {
   await app.register(tagRoutes, { prefix: '/api' });
   await app.register(summaryRoutes, { prefix: '/api' });
   await app.register(exportImportRoutes, { prefix: '/api' });
-  await app.register(adminRoutes, { prefix: '/api' });
+  await app.register(adminRoutes, { prefix: '/api/admin' });
 
   return app;
 }
