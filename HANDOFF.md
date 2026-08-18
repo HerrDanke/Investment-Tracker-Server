@@ -1,6 +1,6 @@
 # Investment Tracker Server - Handoff
 
-> 最后更新：2026-08-18（第九次更新 — 前端移动端适配）
+> 最后更新：2026-08-18（第十次更新 — 移动端细节优化）
 
 ## 项目概述
 
@@ -222,6 +222,9 @@ npm run build
 - [x] AuthContext isAdmin 状态管理
 - [x] 系统标签 UI 保护（隐藏编辑/删除按钮，显示「系统」标识）
 - [x] 移动端适配（响应式侧边栏、汉堡菜单、表格滚动、看板单列）
+- [x] 交易页移动端卡片布局（避免列宽问题）
+- [x] 看板卡片标题居中、拖拽手柄增大
+- [x] 移动端导航栏遮挡修复
 
 ## Docker 部署（2026-08-18 更新）
 
@@ -287,6 +290,10 @@ docker run --rm -v investment-tracker-server_investment-data:/data -v $(pwd):/ba
 ## Git 历史
 
 ```
+6835265 fix: 修复移动端导航栏遮挡内容问题
+b29fa9f fix: 看板卡片标题居中，增大拖拽手柄
+ba523c8 fix: 交易页面移动端改为卡片布局
+50a2ba5 docs: 更新 README 和 HANDOFF 文档
 b679f62 feat: 前端移动端适配
 6e30499 docs: 更新 README 和 HANDOFF 文档
 2883d06 fix: 隐藏系统标签的编辑/删除按钮，显示「系统」标识
