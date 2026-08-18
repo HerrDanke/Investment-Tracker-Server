@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Plus, Edit2, Trash2, Filter } from 'lucide-react';
 import { transactionApi, assetApi } from '../lib/api';
-import { fmt, TXN_LABELS, TXN_TYPES } from '../lib/utils';
+import { fmt, getTxnLabel, TXN_TYPES } from '../lib/utils';
+import { useLang } from '../context/LanguageContext';
 import type { TransactionWithAsset, Asset } from '../types';
 import TransactionForm from '../components/TransactionForm';
 
@@ -23,6 +24,7 @@ function saveColWidths(widths: Record<string, number>) {
 }
 
 export default function Transactions() {
+  const { t, lang } = useLang();
   const [transactions, setTransactions] = useState<TransactionWithAsset[]>([]);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,7 +72,7 @@ export default function Transactions() {
   }, []);
 
   async function handleDelete(id: number) {
-    if (!confirm('确定删除该交易？')) return;
+    if (!confirm(t('transactions.delete_confirm'))) return;
     try {
       await transactionApi.delete(id);
       loadTransactions();
@@ -125,10 +127,10 @@ export default function Transactions() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">交易记录</h1>
+        <h1 className="text-2xl font-bold">{t('transactions.title')}</h1>
         <button onClick={() => { setEditingTxn(undefined); setShowForm(true) }}
           className="flex items-center gap-2 px-4 py-2 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 rounded-lg text-sm font-medium hover:opacity-90">
-          <Plus size={18} /> 添加交易
+          <Plus size={18} /> {t('transactions.add')}
         </button>
       </div>
 
@@ -137,13 +139,13 @@ export default function Transactions() {
           <Filter size={16} className="text-zinc-400" />
           <select value={filterAsset} onChange={e => setFilterAsset(e.target.value ? Number(e.target.value) : '')}
             className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-transparent text-sm">
-            <option value="">全部资产</option>
+            <option value="">{t('transactions.all_assets')}</option>
             {assets.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
           </select>
           <select value={filterType} onChange={e => setFilterType(e.target.value)}
             className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-transparent text-sm">
-            <option value="">全部类型</option>
-            {TXN_TYPES.map(t => <option key={t} value={t}>{TXN_LABELS[t]}</option>)}
+            <option value="">{t('transactions.all_types')}</option>
+            {TXN_TYPES.map(t => <option key={t} value={t}>{getTxnLabel(t, lang)}</option>)}
           </select>
         </div>
       </div>
@@ -153,20 +155,20 @@ export default function Transactions() {
         <table className="w-full text-sm table-fixed" style={{ minWidth: totalWidth + 'px' }}>
           <thead>
             <tr className="border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
-              <ResizableTh col="date" label="日期" width={getColWidth('date')} resizing={resizingCol === 'date'} onResize={handleResizeStart} />
-              <ResizableTh col="asset" label="资产" width={getColWidth('asset')} resizing={resizingCol === 'asset'} onResize={handleResizeStart} />
-              <ResizableTh col="type" label="类型" width={getColWidth('type')} resizing={resizingCol === 'type'} onResize={handleResizeStart} />
-              <ResizableTh col="price" label="价格" width={getColWidth('price')} align="right" resizing={resizingCol === 'price'} onResize={handleResizeStart} />
-              <ResizableTh col="quantity" label="数量" width={getColWidth('quantity')} align="right" resizing={resizingCol === 'quantity'} onResize={handleResizeStart} />
-              <ResizableTh col="fee" label="手续费" width={getColWidth('fee')} align="right" resizing={resizingCol === 'fee'} onResize={handleResizeStart} />
-              <ResizableTh col="amount" label="金额" width={getColWidth('amount')} align="right" resizing={resizingCol === 'amount'} onResize={handleResizeStart} />
-              <ResizableTh col="notes" label="备注" width={getColWidth('notes')} resizing={resizingCol === 'notes'} onResize={handleResizeStart} />
-              <Th col="actions" label="操作" width={getColWidth('actions')} align="center" />
+              <ResizableTh col="date" label={t('transactions.col_date')} width={getColWidth('date')} resizing={resizingCol === 'date'} onResize={handleResizeStart} />
+              <ResizableTh col="asset" label={t('transactions.col_asset')} width={getColWidth('asset')} resizing={resizingCol === 'asset'} onResize={handleResizeStart} />
+              <ResizableTh col="type" label={t('transactions.col_type')} width={getColWidth('type')} resizing={resizingCol === 'type'} onResize={handleResizeStart} />
+              <ResizableTh col="price" label={t('transactions.col_price')} width={getColWidth('price')} align="right" resizing={resizingCol === 'price'} onResize={handleResizeStart} />
+              <ResizableTh col="quantity" label={t('transactions.col_quantity')} width={getColWidth('quantity')} align="right" resizing={resizingCol === 'quantity'} onResize={handleResizeStart} />
+              <ResizableTh col="fee" label={t('transactions.col_fee')} width={getColWidth('fee')} align="right" resizing={resizingCol === 'fee'} onResize={handleResizeStart} />
+              <ResizableTh col="amount" label={t('transactions.col_amount')} width={getColWidth('amount')} align="right" resizing={resizingCol === 'amount'} onResize={handleResizeStart} />
+              <ResizableTh col="notes" label={t('transactions.col_notes')} width={getColWidth('notes')} resizing={resizingCol === 'notes'} onResize={handleResizeStart} />
+              <Th col="actions" label={t('transactions.col_actions')} width={getColWidth('actions')} align="center" />
             </tr>
           </thead>
           <tbody>
             {transactions.length === 0 && (
-              <tr><td colSpan={9} className="py-12 text-center text-zinc-400">暂无交易记录</td></tr>
+              <tr><td colSpan={9} className="py-12 text-center text-zinc-400">{t('transactions.empty')}</td></tr>
             )}
             {transactions.map(txn => {
               const amount = txn.txn_type === 'DIVIDEND' ? 0 : (txn.price || 0) * (txn.quantity || 0) + (txn.fee || 0) + (txn.tax || 0);
@@ -176,13 +178,13 @@ export default function Transactions() {
                   <td className="py-3 px-4 font-medium truncate" style={{ width: getColWidth('asset') + 'px' }}>{txn.asset?.name || '#' + txn.asset_id}</td>
                   <td className="py-3 px-4" style={{ width: getColWidth('type') + 'px' }}>
                     <span className={`px-2 py-0.5 rounded text-xs font-medium ${txn.txn_type === 'BUY' ? 'bg-green-100 text-green-700' : txn.txn_type === 'DIVIDEND' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'}`}>
-                      {TXN_LABELS[txn.txn_type] || txn.txn_type}
+                      {getTxnLabel(txn.txn_type, lang)}
                     </span>
                   </td>
                   <td className="py-3 px-4 text-right truncate" style={{ width: getColWidth('price') + 'px' }}>{txn.price?.toFixed(2) ?? '-'}</td>
                   <td className="py-3 px-4 text-right truncate" style={{ width: getColWidth('quantity') + 'px' }}>{txn.quantity}</td>
                   <td className="py-3 px-4 text-right truncate" style={{ width: getColWidth('fee') + 'px' }}>{txn.fee?.toFixed(2) ?? '-'}</td>
-                  <td className="py-3 px-4 text-right truncate" style={{ width: getColWidth('amount') + 'px' }}>{txn.txn_type === 'DIVIDEND' ? '-' : fmt(amount)}</td>
+                  <td className="py-3 px-4 text-right truncate" style={{ width: getColWidth('amount') + 'px' }}>{txn.txn_type === 'DIVIDEND' ? '-' : fmt(amount, lang)}</td>
                   <td className="py-3 px-4 text-zinc-400 truncate" style={{ width: getColWidth('notes') + 'px' }}>{txn.notes || '-'}</td>
                   <td className="py-3 px-4 text-center sticky right-0 bg-white dark:bg-zinc-900" style={{ width: getColWidth('actions') + 'px' }}>
                     <button onClick={() => { setEditingTxn(txn); setShowForm(true) }} className="p-1 hover:bg-zinc-100 rounded mr-1">
@@ -202,32 +204,32 @@ export default function Transactions() {
       {/* Mobile card layout - visible below md */}
       <div className="md:hidden space-y-3">
         {transactions.length === 0 && (
-          <div className="text-center py-12 text-zinc-400 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800">暂无交易记录</div>
+          <div className="text-center py-12 text-zinc-400 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800">{t('transactions.empty')}</div>
         )}
         {transactions.map(txn => {
           const amount = txn.txn_type === 'DIVIDEND' ? 0 : (txn.price || 0) * (txn.quantity || 0) + (txn.fee || 0) + (txn.tax || 0);
           return (
             <div key={txn.id} className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-medium">{txn.asset?.name || '#' + txn.asset_id}</span>
+                <span className="font-medium">{txn.asset?.name || t('transactions.no_asset')}</span>
                 <span className={`px-2 py-0.5 rounded text-xs font-medium ${txn.txn_type === 'BUY' ? 'bg-green-100 text-green-700' : txn.txn_type === 'DIVIDEND' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'}`}>
-                  {TXN_LABELS[txn.txn_type] || txn.txn_type}
+                  {getTxnLabel(txn.txn_type, lang)}
                 </span>
               </div>
               <div className="text-sm text-zinc-500">{txn.date}</div>
               <div className="grid grid-cols-2 gap-2 text-sm">
-                <div><span className="text-zinc-400">价格:</span> {txn.price?.toFixed(2) ?? '-'}</div>
-                <div><span className="text-zinc-400">数量:</span> {txn.quantity}</div>
-                <div><span className="text-zinc-400">手续费:</span> {txn.fee?.toFixed(2) ?? '-'}</div>
-                <div><span className="text-zinc-400">金额:</span> {txn.txn_type === 'DIVIDEND' ? '-' : fmt(amount)}</div>
+                <div><span className="text-zinc-400">{t('transactions.col_price')}:</span> {txn.price?.toFixed(2) ?? '-'}</div>
+                <div><span className="text-zinc-400">{t('transactions.col_quantity')}:</span> {txn.quantity}</div>
+                <div><span className="text-zinc-400">{t('transactions.col_fee')}:</span> {txn.fee?.toFixed(2) ?? '-'}</div>
+                <div><span className="text-zinc-400">{t('transactions.col_amount')}:</span> {txn.txn_type === 'DIVIDEND' ? '-' : fmt(amount, lang)}</div>
               </div>
               {txn.notes && <div className="text-sm text-zinc-400 truncate">{txn.notes}</div>}
               <div className="flex justify-end gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
                 <button onClick={() => { setEditingTxn(txn); setShowForm(true) }} className="flex items-center gap-1 px-3 py-1.5 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg">
-                  <Edit2 size={14} className="text-zinc-400" /> 编辑
+                  <Edit2 size={14} className="text-zinc-400" /> {t('common.edit')}
                 </button>
                 <button onClick={() => handleDelete(txn.id)} className="flex items-center gap-1 px-3 py-1.5 text-sm hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
-                  <Trash2 size={14} className="text-red-400" /> 删除
+                  <Trash2 size={14} className="text-red-400" /> {t('common.delete')}
                 </button>
               </div>
             </div>
@@ -239,7 +241,7 @@ export default function Transactions() {
         <TransactionForm transaction={editingTxn} onClose={() => setShowForm(false)} onSave={() => {
           setShowForm(false);
           loadTransactions();
-        }} />
+        }} lang={lang} />
       )}
     </div>
   );
