@@ -1,6 +1,6 @@
 # Investment Tracker Server - Handoff
 
-> 最后更新：2026-08-18（第十一次更新 — 中英切换功能）
+> 最后更新：2026-08-18（第十二次更新 — 中英切换完整落地）
 
 ## 项目概述
 
@@ -225,7 +225,7 @@ npm run build
 - [x] 交易页移动端卡片布局（避免列宽问题）
 - [x] 看板卡片标题居中、拖拽手柄增大
 - [x] 移动端导航栏遮挡修复
-- [x] 中英切换功能（i18n 基础设施 + 登录页翻译）
+- [x] 中英切换功能（完整落地：所有页面 + 卡片组件 + 工具函数）
 
 ## Docker 部署（2026-08-18 更新）
 
@@ -291,6 +291,8 @@ docker run --rm -v investment-tracker-server_investment-data:/data -v $(pwd):/ba
 ## Git 历史
 
 ```
+54f53c8 feat: 中英切换功能完整落地（所有页面翻译）
+028d3a0 docs: 更新 README 和 HANDOFF 文档
 99ae665 feat: 中英切换功能（i18n 基础设施 + 登录页）
 73710ca docs: 更新 README 和 HANDOFF 文档
 6835265 fix: 修复移动端导航栏遮挡内容问题
