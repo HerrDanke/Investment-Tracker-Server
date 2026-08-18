@@ -354,12 +354,13 @@ class DatabaseManager {
     return this.users.length > 0 && this.users[0].id === userId;
   }
 
-  // List all users (safe summary without password hashes)
-  listUsers(): { id: string; username: string; created_at: string }[] {
+  // List all users (safe summary without password hashes, with admin flag)
+  listUsers(): { id: string; username: string; created_at: string; isAdmin: boolean }[] {
     return this.users.map((u) => ({
       id: u.id,
       username: u.username,
       created_at: u.created_at,
+      isAdmin: this.isAdmin(u.id),
     }));
   }
 

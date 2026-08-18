@@ -6,6 +6,7 @@ interface UserInfo {
   id: string;
   username: string;
   created_at: string;
+  isAdmin: boolean;
 }
 
 export default function Users() {
@@ -192,14 +193,16 @@ export default function Users() {
                       >
                         <Download size={15} className="text-zinc-400" />
                       </button>
-                      <button
-                        onClick={() => handleDelete(u)}
-                        disabled={actionId === u.id}
-                        title="删除用户"
-                        className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded disabled:opacity-50"
-                      >
-                        <Trash2 size={15} className="text-red-400" />
-                      </button>
+                      {!u.isAdmin && (
+                        <button
+                          onClick={() => handleDelete(u)}
+                          disabled={actionId === u.id}
+                          title="删除用户"
+                          className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded disabled:opacity-50"
+                        >
+                          <Trash2 size={15} className="text-red-400" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
